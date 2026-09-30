@@ -12,7 +12,7 @@ PASSWORD_RE = re.compile(r"^(?=.*[A-Za-z])(?=.*\d).{10,128}$")
 
 
 def hash_password(password: str) -> str:
-    return bcrypt.hashpw(password.encode()[:72], bcrypt.gensalt(rounds=12)).decode()
+    return bcrypt.hashpw(password.encode()[:72], bcrypt.gensalt(rounds=get_settings().bcrypt_rounds)).decode()
 
 
 def verify_password(password: str, hashed: str) -> bool:
@@ -23,7 +23,7 @@ def verify_password(password: str, hashed: str) -> bool:
 
 
 # A real bcrypt hash of a random string, so unknown-email logins cost the same time as wrong-password ones.
-DUMMY_HASH = bcrypt.hashpw(secrets.token_bytes(16), bcrypt.gensalt(rounds=12)).decode()
+DUMMY_HASH = bcrypt.hashpw(secrets.token_bytes(16), bcrypt.gensalt(rounds=get_settings().bcrypt_rounds)).decode()
 
 
 def create_access_token(user_id: int, role: str) -> tuple[str, int]:

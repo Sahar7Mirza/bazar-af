@@ -4,6 +4,7 @@ import os
 os.environ["ENVIRONMENT"] = "test"
 os.environ["DATABASE_URL"] = os.environ.get("TEST_DATABASE_URL", "postgresql+psycopg://bazaraf:dev-only-pw@localhost:5432/bazaraf_test")
 os.environ["LOG_LEVEL"] = "WARNING"
+os.environ["BCRYPT_ROUNDS"] = "4"  # speed only; production default is 12 (see test_default_bcrypt_cost)
 
 import pytest
 from alembic.config import Config

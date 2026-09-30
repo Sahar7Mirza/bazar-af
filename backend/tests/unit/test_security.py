@@ -10,7 +10,7 @@ from app.schemas.auth import RegisterIn
 
 def test_password_hash_roundtrip_and_salting():
     h1, h2 = hash_password("Sup3rSecret!!"), hash_password("Sup3rSecret!!")
-    assert h1 != h2 and h1.startswith("$2b$12$")
+    assert h1 != h2 and h1.startswith("$2b$")
     assert verify_password("Sup3rSecret!!", h1) and not verify_password("wrong", h1)
     assert not verify_password("x", "not-a-hash")
 
@@ -54,3 +54,10 @@ def test_phone_normalised_and_validated():
     assert ok.phone == "+93700000001"
     with pytest.raises(ValueError):
         RegisterIn(email="a@b.af", password="Str0ngPassw0rd", full_name="Ab", phone="abc")
+
+
+def test_default_bcrypt_cost_is_12():
+    from app.core.config import Settings
+
+    assert Settings(_env_file=None, bcrypt_rounds=12).bcrypt_rounds == 12
+    assert Settings.model_fields["bcrypt_rounds"].default == 12
