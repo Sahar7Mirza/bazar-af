@@ -1,0 +1,54 @@
+# Local / single-host deployment. Copy .env.example to .env and fill in the secrets first.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build: ./backend
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env (openssl rand -hex 32)}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      ACCESS_TOKEN_MINUTES: ${ACCESS_TOKEN_MINUTES:-15}
+      REFRESH_TOKEN_DAYS: ${REFRESH_TOKEN_DAYS:-7}
+    depends_on:
+      db: { condition: service_healthy }
+    ports: ["8000:8000"]
+    restart: unless-stopped
+
+  web:
+    build: ./frontend
+    environment:
+      API_URL: http://api:8000/api/v1
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}   # set true when served over HTTPS
+    depends_on:
+      api: { condition: service_healthy }
+    ports: ["3000:3000"]
+    restart: unless-stopped
+
+  # One-off demo data:  docker compose --profile seed run --rm seed
+  seed:
+    build: ./backend
+    profiles: ["seed"]
+    entrypoint: ["python", "-m", "app.seed", "--reset"]
+    environment:
+      ENVIRONMENT: development
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      SEED_PASSWORD: ${SEED_PASSWORD:?set SEED_PASSWORD in .env for demo data}
+    depends_on:
+      api: { condition: service_healthy }
+
+volumes:
+  pgdata:

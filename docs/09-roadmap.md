@@ -13,3 +13,14 @@ Each phase: feature branch → tests green → PR/merge (`--no-ff`) into `main` 
 | 5 | `feature/tests-docker-docs` | Playwright E2E, usability test kit, Dockerfiles, compose, CI, README, deployment guide | full suite green |
 
 GitHub: remote added when the owner creates the repo; nothing with secrets is committed (`.env` ignored, `.env.example` tracked).
+
+## Status
+| Phase | Status | Tests at completion |
+|---|---|---|
+| 0 Design docs | done | - |
+| 1 Backend foundation | done | 16 |
+| 2 Auth + RBAC | done | 44 |
+| 3 Catalog, orders, admin | done | 80 |
+| 3b Research + seed | done | 108 (96% coverage) |
+| 4 Frontend | done | + 8 unit, 20 E2E |
+| 5 Docker, CI, docs | done (Docker images not built in the authoring sandbox - see README) | |
