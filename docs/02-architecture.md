@@ -1,22 +1,29 @@
 # 2. Architecture
 
 ## 2.1 Style
-A classic three-tier web application: **Next.js (TypeScript)** for the UI, **FastAPI** for a stateless JSON API, **PostgreSQL** for data. The API is the only component that touches the database. The browser talks to the API with `Authorization: Bearer <access token>`.
+A classic three-tier web application: **Next.js (TypeScript)** for the UI, **FastAPI** for a stateless JSON API, **PostgreSQL** for data. The API is the only component that touches the database. As built, the browser never calls the API directly: it talks to a **Next.js backend-for-frontend (BFF)** on the same origin, which holds the tokens in httpOnly cookies and forwards calls with `Authorization: Bearer <access token>`.
 
 ```mermaid
 flowchart LR
   subgraph Browser
-    UI[Next.js app<br/>Buyer / Seller / Admin pages]
+    UI[React pages<br/>Buyer / Seller / Admin / Survey]
   end
-  subgraph Server
-    API[FastAPI<br/>routers → services → models]
-    MW[Middleware: request-id, logging,<br/>security headers, CORS, rate limit]
-    DB[(PostgreSQL 16)]
+  subgraph Web["Next.js server (:3000)"]
+    GUARD[proxy.ts route guard]
+    BFF["BFF route handlers<br/>/api/auth/login, /api/auth/logout,<br/>/api/proxy/* (attaches token, refreshes on 401)"]
   end
-  UI -- HTTPS JSON + JWT --> MW --> API
-  API -- SQLAlchemy 2 / psycopg --> DB
-  API -. JSON logs .-> LOG[(stdout → log collector)]
-  ADM[Alembic migrations + seed CLI] --> DB
+  subgraph Api["FastAPI (:8000)"]
+    MW[Middleware: request-id, JSON access log,<br/>security headers, CORS]
+    R[routers -> services -> models]
+    AN[analytics: pandas / SciPy / statsmodels]
+  end
+  DB[(PostgreSQL 16)]
+  UI -- same-origin fetch, httpOnly cookies --> GUARD --> BFF
+  BFF -- JSON + Bearer JWT --> MW --> R
+  R --> AN
+  R -- SQLAlchemy 2 / psycopg --> DB
+  R -. JSON logs .-> LOG[(stdout)]
+  OPS[Alembic migrations + seed CLI] --> DB
 ```
 
 ## 2.2 Backend layers
@@ -48,7 +55,7 @@ sequenceDiagram
   A-->>U: new access + new refresh
   Note over A,D: reuse of a used refresh token revokes the whole family
 ```
-The frontend keeps the access token in memory and the refresh token in an **httpOnly, SameSite=Lax, Secure cookie** set by a Next.js route handler (BFF pattern), so JavaScript cannot read it (XSS-resistant).
+Both tokens live in **httpOnly, SameSite=Lax cookies** (`Secure` over HTTPS) set by the Next.js BFF, so page JavaScript can never read them (XSS-resistant; asserted by an E2E test). The refresh cookie is scoped to `/api`. The BFF refreshes transparently on a 401 and never exposes the login/refresh/logout endpoints through its generic proxy. Mutating proxy calls also reject cross-origin `Origin` headers.
 
 ## 2.4 Order flow (simulated payment)
 ```mermaid
