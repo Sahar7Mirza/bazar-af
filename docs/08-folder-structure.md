@@ -1,7 +1,7 @@
 # 08 · Folder structure
 
 ```
-pol-market/
+bazar-af/
 ├── README.md
 ├── docker-compose.yml
 ├── .env.example
@@ -18,6 +18,7 @@ pol-market/
 │   │   ├── db/                # engine, session, base
 │   │   ├── models/            # SQLAlchemy
 │   │   ├── schemas/           # Pydantic
+│   │   ├── analytics/         # descriptives, reliability, correlation, regression
 │   │   ├── services/          # business rules + ownership checks
 │   │   ├── routers/           # auth, categories, sellers, products, orders, admin
 │   │   └── seed.py
