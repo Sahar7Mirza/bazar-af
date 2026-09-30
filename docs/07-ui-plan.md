@@ -16,4 +16,9 @@ Design: clean, mobile-first (MSE owners use phones), light theme, large tap targ
 | `/admin` | admin | Stats |
 | `/admin/users`, `/admin/sellers`, `/admin/orders`, `/admin/audit` | admin | Paginated tables, approve/reject, deactivate |
 
+| `/survey` | public | Consent, demographics, Likert items (one construct per step, progress bar, keyboard friendly) |
+| `/admin/research` | admin | Progress vs 150 target, construct chart, correlation heat-map, regression table, preference split, CSV export |
+
+Every data view has four states: **loading** (skeleton), **error** (message + retry + request id), **empty** (explanation + next action) and **content**. Accessibility: semantic landmarks, labelled inputs, visible focus, colour-contrast AA, charts with text tables as alternatives, `prefers-reduced-motion`.
+
 Shared: typed API client, BFF route handlers (`/api/auth/*`) holding the refresh cookie, middleware route guards by role, toast + error boundary, loading skeletons, accessible forms.

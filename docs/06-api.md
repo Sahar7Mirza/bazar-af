@@ -36,5 +36,8 @@ Base path `/api/v1`. JSON only. Auth: `Authorization: Bearer <access JWT>` (the 
 | | GET `/admin/orders`, GET `/admin/stats` | admin |
 | | GET `/admin/audit` | admin |
 
+| Survey | GET `/survey`, POST `/survey/responses` | public (rate-limited) |
+| Research | GET `/admin/research/{summary,descriptives,reliability,correlations,regression,export.csv}`, GET `/admin/analytics/marketplace` | admin |
+
 Status codes: 200/201/204; 400 validation; 401 unauthenticated; 403 forbidden; 404 (also for other users' resources); 409 conflict (email taken, insufficient stock, illegal state change); 422 schema; 429 rate limit.
 Interactive docs: `/docs` (Swagger) and `/redoc`, generated from Pydantic schemas.

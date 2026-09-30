@@ -3,7 +3,7 @@
 ## 1.1 Problem and context
 Micro and small enterprises (MSEs) in Kabul — bakeries, tailors, grocers, phone repair, carpentry, home kitchens — mostly sell face to face or through informal chat groups. They have no shared catalogue, no order record and no simple view of what customers want. Customers cannot easily discover nearby businesses or tell the seller in advance how they intend to pay. Cash dominates, and mobile money (M-Paisa, HesabPay and similar) is growing but not universal.
 
-**Pol Market** is a small marketplace where Sellers list products, Buyers place orders, and each order records the buyer's **simulated payment preference** (Cash or Mobile Money). The platform never moves money.
+**Bazar.af** is a small marketplace where Sellers list products, Buyers place orders, and each order records the buyer's **simulated payment preference** (Cash or Mobile Money). The platform never moves money.
 
 ## 1.2 Hard constraints (from the brief)
 | # | Constraint | Consequence |
@@ -25,13 +25,16 @@ Micro and small enterprises (MSEs) in Kabul — bakeries, tailors, grocers, phon
 
 **Administrator** — FR15 approve / reject / suspend sellers; FR16 list and deactivate users; FR17 manage categories; FR18 moderate products (hide); FR19 view all orders (read only); FR20 view the audit log; FR21 see platform statistics.
 
+**Research module (Administrator/Researcher)** — FR22 publish a TAM/UTAUT-based questionnaire (constructs: Usefulness, Ease of use, Trust, Cost, Accessibility, Willingness to adopt mobile money); FR23 anyone can submit **one anonymous response** per device/session through a public survey page (consent checkbox, no personal identifiers); FR24 admin sees response counts against the target of 150 and data-quality flags; FR25 admin dashboard with descriptive statistics, reliability (Cronbach's alpha), correlations and multiple regression of Willingness on the five predictors; FR26 export anonymised responses as CSV; FR27 marketplace analytics (orders by preference, provider share, by district/category).
+
 ## 1.4 Non-functional requirements
 - **Security**: bcrypt password hashing (cost 12), password policy, account lockout (5 failures → 15 min), login rate limit, JWT with `exp`, refresh-token rotation and revocation, object-level authorisation (a seller cannot touch another seller's products or orders), CORS allow-list, security headers, no secrets in Git, generic login errors (no user enumeration).
 - **Correctness**: prices stored as `NUMERIC(12,2)`; order totals computed on the server from current prices, snapshotted into order items; stock decremented atomically in the same transaction as order creation (row lock) and restored on cancellation.
 - **Observability**: JSON logs, `X-Request-ID`, access log, error log; audit log for security- and business-relevant events.
 - **Maintainability**: layered modules (router → service → repository/models), one error type, typed schemas, migrations only (no `create_all` outside tests).
 - **Performance targets (demo scale)**: list endpoints paginated (default 20, max 100) with indexes on all filter/sort columns; p95 < 300 ms on the seed data set.
-- **Usability**: responsive, keyboard accessible, English UI with Dari (RTL) planned as a later phase (see roadmap).
+- **Research ethics**: survey is voluntary and anonymous, consent recorded, no IP/phone stored with answers, results only shown in aggregate (minimum group size 5 when broken down).
+- **Usability**: responsive, loading / error / empty states on every data view, WCAG 2.1 AA targets (contrast, labels, focus, keyboard), usability test with >= 10 users (see docs/10-research-module.md);, keyboard accessible, English UI with Dari (RTL) planned as a later phase (see roadmap).
 
 ## 1.5 Out of scope
 Real payments or wallet integration, delivery/courier logistics, reviews and ratings, chat, multi-seller carts, email/SMS delivery (verification codes can reuse the approach from the earlier *Pol connector* project), native mobile apps.

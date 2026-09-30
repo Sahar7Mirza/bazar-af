@@ -84,3 +84,28 @@ CREATE INDEX ix_audit_time ON audit_log (created_at DESC); CREATE INDEX ix_audit
 ```
 
 `updated_at` is maintained by the ORM (`onupdate`). Indexes follow the list endpoints: browse (status/category/price), seller inbox (seller/status/time), buyer history (buyer/time).
+
+## Research tables
+```sql
+CREATE TABLE survey_questions (
+  id BIGSERIAL PRIMARY KEY,
+  construct TEXT NOT NULL CHECK (construct IN ('PU','PEOU','TR','CO','AC','WA')),
+  code TEXT NOT NULL UNIQUE, text_en TEXT NOT NULL, text_fa TEXT,
+  position INT NOT NULL, is_reverse_scored BOOLEAN NOT NULL DEFAULT FALSE, is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(), updated_at TIMESTAMPTZ NOT NULL DEFAULT now());
+CREATE TABLE survey_responses (
+  id BIGSERIAL PRIMARY KEY,
+  consent BOOLEAN NOT NULL CHECK (consent),
+  respondent_type TEXT NOT NULL CHECK (respondent_type IN ('seller','buyer','other')),
+  age_band TEXT, gender TEXT, district TEXT, business_type TEXT, uses_mobile_money BOOLEAN,
+  completion_seconds INT, is_valid BOOLEAN NOT NULL DEFAULT TRUE, invalid_reason TEXT,
+  is_synthetic BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(), updated_at TIMESTAMPTZ NOT NULL DEFAULT now());
+CREATE TABLE survey_answers (
+  id BIGSERIAL PRIMARY KEY,
+  response_id BIGINT NOT NULL REFERENCES survey_responses(id) ON DELETE CASCADE,
+  question_id BIGINT NOT NULL REFERENCES survey_questions(id),
+  value SMALLINT NOT NULL CHECK (value BETWEEN 1 AND 5),
+  UNIQUE (response_id, question_id));
+CREATE INDEX ix_answers_question ON survey_answers(question_id);
+```

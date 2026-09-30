@@ -125,3 +125,35 @@ erDiagram
 - A buyer cannot be the seller of their own order (service rule + test).
 - `order_items.line_total_afn = unit_price_afn * quantity` (CHECK). `orders.total_afn` equals the sum of its lines (service rule + integration test).
 - Products referenced by orders are soft-deleted (`deleted_at`), never removed.
+
+```mermaid
+erDiagram
+  SURVEY_QUESTIONS { bigint id PK
+    text construct "PU|PEOU|TR|CO|AC|WA"
+    text code UK
+    text text_en
+    text text_fa
+    int position
+    bool is_reverse_scored
+    bool is_active }
+  SURVEY_RESPONSES { bigint id PK
+    bool consent
+    text respondent_type
+    text age_band
+    text gender
+    text district
+    text business_type
+    bool uses_mobile_money
+    int completion_seconds
+    bool is_valid
+    text invalid_reason
+    timestamptz created_at
+    timestamptz updated_at }
+  SURVEY_ANSWERS { bigint id PK
+    bigint response_id FK
+    bigint question_id FK
+    smallint value "1..5" }
+  SURVEY_RESPONSES ||--|{ SURVEY_ANSWERS : contains
+  SURVEY_QUESTIONS ||--o{ SURVEY_ANSWERS : answered_by
+```
+Survey tables are deliberately not linked to `users` (anonymity).

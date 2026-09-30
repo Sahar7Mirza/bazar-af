@@ -1,6 +1,6 @@
-# Pol Market
+# Bazar.af
 
-Marketplace for micro and small enterprises in Kabul with Buyer, Seller and Administrator roles.
+Digital marketplace and mobile-money adoption analytics platform for micro and small enterprises in Kabul with Buyer, Seller and Administrator roles.
 **No real financial transactions are processed** — only a simulated Cash / Mobile Money preference is recorded per order.
 
 Stack: PostgreSQL 16 · FastAPI · Next.js (TypeScript) · Docker.
