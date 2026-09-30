@@ -1,6 +1,6 @@
 # 07 · UI plan (Next.js App Router, TypeScript)
 
-Design: clean, mobile-first (MSE owners use phones), light theme, large tap targets, English UI with RTL-ready layout tokens (Dari later).
+Design: **Apple.com-style** (see docs/11): large light hero, whitespace, #f5f5f7 sections, 18px cards, pill buttons, blue accent #0071e3, frosted nav, dark mode; mobile-first (MSE owners use phones), RTL-ready logical CSS.
 
 | Route | Role | Screen |
 |---|---|---|
