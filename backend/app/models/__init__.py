@@ -209,7 +209,7 @@ class SurveyResponse(Base, Timestamps):
     consent: Mapped[bool] = mapped_column(Boolean)
     respondent_type: Mapped[str] = mapped_column(String(10))
     age_band: Mapped[str | None] = mapped_column(String(10))
-    gender: Mapped[str | None] = mapped_column(String(15))
+    gender: Mapped[str | None] = mapped_column(String(20))
     district: Mapped[str | None] = mapped_column(String(40))
     business_type: Mapped[str | None] = mapped_column(String(60))
     uses_mobile_money: Mapped[bool | None] = mapped_column(Boolean)
