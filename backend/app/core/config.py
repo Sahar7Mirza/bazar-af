@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     refresh_token_days: int = 7
     cors_origins: str = "http://localhost:3000"
     log_level: str = "INFO"
+    bcrypt_rounds: int = Field(default=12, ge=4, le=15)  # tests lower it for speed; production keeps 12
     lockout_threshold: int = 5
     lockout_minutes: int = 15
 
