@@ -11,6 +11,31 @@ A marketplace for micro and small enterprises (MSEs) in Kabul, combined with a *
 | UI | Apple.com-inspired design, responsive, dark mode, WCAG-minded (axe-checked), loading / error / empty states |
 | Research | TAM/UTAUT survey -> descriptives, Cronbach's α, correlations, OLS regression, dashboard, CSV export |
 
+## Screenshots
+
+Captured from the running app with the seeded demo data (all data is synthetic).
+
+| | |
+|---|---|
+| ![Home](docs/img/01-home.png) | ![Shop](docs/img/02-products.png) |
+| Landing page: marketplace for Kabul's small businesses | Shop with search, category, district and price filters |
+| ![Product](docs/img/03-product.png) | ![Sign in](docs/img/04-signin.png) |
+| Product page; payment is only a recorded preference | Sign in (JWT in httpOnly cookies) |
+| ![Buyer orders](docs/img/05-buyer-orders.png) | ![Seller dashboard](docs/img/06-seller-dashboard.png) |
+| Buyer: order history with Cash / Mobile Money preference | Seller: overview of orders, sales and top products |
+| ![Seller products](docs/img/07-seller-products.png) | ![Seller orders](docs/img/08-seller-orders.png) |
+| Seller: product management (edit, hide, delete) | Seller: incoming orders and status workflow |
+| ![Admin dashboard](docs/img/09-admin-dashboard.png) | ![Seller approval](docs/img/10-admin-sellers.png) |
+| Administrator: platform totals and payment-preference split | Administrator: seller approval queue |
+| ![Audit log](docs/img/12-admin-audit.png) | ![Survey](docs/img/13-survey.png) |
+| Audit log of logins and admin actions | Anonymous mobile-money survey (consent first, 5-minute flow) |
+| ![Mobile](docs/img/14-mobile-home.png) | ![Dark mode](docs/img/15-dark-products.png) |
+| Responsive layout on a phone | Dark mode follows the system setting |
+
+Research dashboard (descriptives, reliability, regression, correlations):
+
+![Research dashboard](docs/img/11-admin-research.png)
+
 ## Quick start (Docker)
 ```bash
 git clone <this repo> && cd bazar-af
