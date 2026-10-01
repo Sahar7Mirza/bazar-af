@@ -41,6 +41,7 @@ jobs:
   e2e:
     needs: [backend, frontend]
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:16
@@ -73,6 +74,9 @@ jobs:
         run: |
           npm ci
           npm run build
+          # the standalone server needs the static assets and public/ beside it (the Dockerfile does the same)
+          cp -r .next/static .next/standalone/.next/static
+          cp -r public .next/standalone/public
           nohup node .next/standalone/server.js > ../web.log 2>&1 &
           npx playwright install --with-deps chromium
         env: { PORT: "3000", HOSTNAME: "0.0.0.0" }
