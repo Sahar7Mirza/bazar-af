@@ -8,3 +8,7 @@ ignore = ["B008", "UP042"]  # FastAPI Depends()/Query() in defaults is idiomatic
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["E702", "E501"]
+
+# Vercel (serverless) deployment: migrations run at build time because there is no long-running start script.
+[tool.vercel.scripts]
+build = "python scripts/vercel_build.py"

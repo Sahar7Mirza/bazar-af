@@ -29,3 +29,18 @@ cd ../frontend && npm ci && API_URL=http://localhost:8000/api/v1 npm run dev
 
 ## Verification status
 The compose file, Dockerfiles and CI workflow were written and syntax-checked, and the same steps were executed natively (migrations, production-mode API start, standalone Next.js server). The authoring sandbox had no Docker daemon, so **the images themselves have not been built yet** - run `docker compose up --build` once and the CI workflow on first push to confirm.
+
+## Deploying on Vercel (frontend + API + Neon PostgreSQL)
+
+Two Vercel projects are created from this one repository, plus a Neon database.
+
+| Part | Vercel project root | Environment variables |
+|---|---|---|
+| API (FastAPI, Python runtime) | `backend` | `ENVIRONMENT=production`, `DATABASE_URL` (Neon, `postgresql+psycopg://...?sslmode=require`), `JWT_SECRET` (32+ chars), `CORS_ORIGINS` (the frontend URL) |
+| Web (Next.js) | `frontend` | `API_URL=https://<api-project>.vercel.app/api/v1` |
+
+- The API entrypoint is `backend/index.py`. `backend/scripts/vercel_build.py` applies Alembic migrations at build time (skipped when `DATABASE_URL` is not set).
+- Create the API project first, then the web project (it needs the API URL). Add the web URL to `CORS_ORIGINS` and redeploy the API.
+- Demo data: `python -m app.seed --reset` refuses `ENVIRONMENT=production`. Run it once from a developer machine with `ENVIRONMENT=development`, `SEED_PASSWORD` and `DATABASE_URL` pointing at the Neon database.
+- Limits to know: the Python bundle limit is 500 MB (the API is about 340 MB with pandas, SciPy and statsmodels); the in-memory login rate limiter is per function instance, so it is best effort on serverless, while account lockout is stored in the database.
+- Vercel Deployment Protection must not block the API's production URL, or the web project's server-side calls will receive 401.
