@@ -12,3 +12,8 @@ coverage/
 playwright-report/
 test-results/
 .DS_Store
+
+# test coverage data
+.coverage
+.coverage.*
+htmlcov/
