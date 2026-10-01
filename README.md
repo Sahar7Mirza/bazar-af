@@ -11,6 +11,8 @@ A marketplace for micro and small enterprises (MSEs) in Kabul, combined with a *
 | UI | Apple.com-inspired design, responsive, dark mode, WCAG-minded (axe-checked), loading / error / empty states |
 | Research | TAM/UTAUT survey -> descriptives, Cronbach's α, correlations, OLS regression, dashboard, CSV export |
 
+> Deploying online: see [docs/13-deployment.md](docs/13-deployment.md) (Docker, or Vercel + Neon).
+
 ## Screenshots
 
 Captured from the running app with the seeded demo data (all data is synthetic).
