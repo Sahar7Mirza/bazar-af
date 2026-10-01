@@ -6,6 +6,7 @@ A marketplace for micro and small enterprises (MSEs) in Kabul, combined with a *
 
 | | |
 |---|---|
+| Live demo | **https://bazar-af-eta.vercel.app** (API: https://bazar-af-api.vercel.app/api/v1/health) · demo logins in [docs/14-demo-accounts.md](docs/14-demo-accounts.md) |
 | Roles | **Buyer**, **Seller** (needs admin approval), **Administrator** |
 | Stack | PostgreSQL 16 · FastAPI (Python 3.11, SQLAlchemy 2, Alembic, Pydantic v2) · Next.js 16 + React 19 (TypeScript) · Docker |
 | UI | Apple.com-inspired design, responsive, dark mode, WCAG-minded (axe-checked), loading / error / empty states |
@@ -78,7 +79,7 @@ More: [local install without Docker](docs/13-deployment.md) · [testing](docs/12
 | [07 UI plan](docs/07-ui-plan.md) · [08 Folder structure](docs/08-folder-structure.md) · [09 Roadmap](docs/09-roadmap.md) | |
 | [10 Research module](docs/10-research-module.md) | instrument, statistics, dashboard |
 | [11 v1 gap analysis](docs/11-v1-gap-analysis.md) | what the live v1 lacked and how this rebuild answers it |
-| [12 Testing](docs/12-testing.md) · [13 Deployment](docs/13-deployment.md) · [Usability plan](docs/usability/01-test-plan.md) | |
+| [12 Testing](docs/12-testing.md) · [13 Deployment](docs/13-deployment.md) · [14 Demo accounts](docs/14-demo-accounts.md) · [Usability plan](docs/usability/01-test-plan.md) | |
 
 ## Tests
 Backend **108** (unit, API, integration incl. concurrency) at **96 %** coverage · frontend **8** unit · **20** Playwright E2E incl. axe accessibility scan. CI (`.github/workflows/ci.yml`) runs all of them on every push and pull request.
