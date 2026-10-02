@@ -31,7 +31,6 @@ export function Nav() {
         <button className="btn quiet sm menu-btn" aria-expanded={open} aria-controls="mainnav" onClick={() => setOpen(!open)}>{open ? "Close" : "Menu"}</button>
         <nav id="mainnav" className={`nav ${open ? "open" : ""}`} aria-label="Main" onClick={() => setOpen(false)}>
           <Link href="/products" aria-current={cur("/products")}>Shop</Link>
-          <Link href="/survey" aria-current={cur("/survey")}>Research survey</Link>
           {user && user.role !== "admin" && <Link href="/orders" aria-current={cur("/orders")}>Orders</Link>}
           {home && <Link href={home} aria-current={cur(home)}>{user?.role === "admin" ? "Admin" : "My shop"}</Link>}
         </nav>

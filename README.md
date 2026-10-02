@@ -30,8 +30,8 @@ Captured from the running app with the seeded demo data (all data is synthetic).
 | Seller: product management (edit, hide, delete) | Seller: incoming orders and status workflow |
 | ![Admin dashboard](docs/img/09-admin-dashboard.png) | ![Seller approval](docs/img/10-admin-sellers.png) |
 | Administrator: platform totals and payment-preference split | Administrator: seller approval queue |
-| ![Audit log](docs/img/12-admin-audit.png) | ![Survey](docs/img/13-survey.png) |
-| Audit log of logins and admin actions | Anonymous mobile-money survey (consent first, 5-minute flow) |
+| ![Audit log](docs/img/12-admin-audit.png) | |
+| Audit log of logins and admin actions | |
 | ![Mobile](docs/img/14-mobile-home.png) | ![Dark mode](docs/img/15-dark-products.png) |
 | Responsive layout on a phone | Dark mode follows the system setting |
 
@@ -52,7 +52,7 @@ Swagger UI is at http://localhost:8000/docs when `ENVIRONMENT=development`.
 More: [local install without Docker](docs/13-deployment.md) · [testing](docs/12-testing.md) · [deployment checklist](docs/13-deployment.md)
 
 ## What you can do
-- **Anyone:** browse, search, filter (category, district, price) and sort products; take the anonymous research survey.
+- **Anyone:** browse, search, filter (category, district, price) and sort products.
 - **Buyer:** register, cart (one seller per order), checkout with a Cash / Mobile Money preference, track and cancel pending orders.
 - **Seller:** shop profile, product CRUD (soft delete, stock), incoming orders through `pending -> confirmed -> ready -> completed` or cancel (stock restored), dashboard.
 - **Administrator:** approve / reject / suspend sellers, deactivate users, moderate products, manage categories, read every order, view the audit log, research dashboard and marketplace analytics.
