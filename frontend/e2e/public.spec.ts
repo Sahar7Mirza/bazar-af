@@ -43,7 +43,7 @@ test("unknown product shows an error state, not a crash", async ({ page }) => {
 });
 
 test("landing and catalogue have no serious accessibility violations", async ({ page }) => {
-  for (const url of ["/", "/products", "/login", "/register", "/survey"]) {
+  for (const url of ["/", "/products", "/login", "/register"]) {
     await page.goto(url);
     await page.waitForLoadState("networkidle");
     const res = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]).analyze();

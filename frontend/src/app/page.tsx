@@ -49,9 +49,9 @@ export default async function Home() {
       </div></section>
 
       <section className="section"><div className="mid center">
-        <h2>Help shape financial inclusion</h2>
-        <p className="lead muted">Take our 5-minute anonymous survey on mobile money for small businesses in Kabul.</p>
-        <Link className="btn lg" href="/survey">Take the survey</Link>
+        <h2>Cash or Mobile Money, your choice</h2>
+        <p className="lead muted">At checkout you tell the seller how you plan to pay. No money moves on Bazar.af, and your choice helps show how many people in Kabul use mobile money.</p>
+        <Link className="btn lg" href="/products">Start shopping</Link>
       </div></section>
     </>
   );
