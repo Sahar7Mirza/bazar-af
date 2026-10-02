@@ -160,6 +160,7 @@ class Order(Base, Timestamps):
     total_afn: Mapped[Decimal] = mapped_column(Numeric(12, 2))
     buyer_note: Mapped[str | None] = mapped_column(String(300))
     cancel_reason: Mapped[str | None] = mapped_column(String(300))
+    estimated_pickup_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))  # set by the seller when confirming
     items: Mapped[list["OrderItem"]] = relationship(back_populates="order", cascade="all, delete-orphan")
 
 
@@ -174,6 +175,21 @@ class OrderItem(Base, Timestamps):
     quantity: Mapped[int] = mapped_column(Integer)
     line_total_afn: Mapped[Decimal] = mapped_column(Numeric(12, 2))
     order: Mapped[Order] = relationship(back_populates="items")
+
+
+class Notification(Base):
+    """In-app notification (shown under the bell). Email delivery can be layered on later without changing this table."""
+
+    __tablename__ = "notifications"
+    __table_args__ = (Index("ix_notifications_user_created", "user_id", "created_at"),)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    order_id: Mapped[int | None] = mapped_column(ForeignKey("orders.id", ondelete="CASCADE"))
+    kind: Mapped[str] = mapped_column(String(30))  # order_confirmed | order_ready | order_cancelled
+    title: Mapped[str] = mapped_column(String(120))
+    message: Mapped[str] = mapped_column(String(400))
+    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
 class AuditLog(Base):

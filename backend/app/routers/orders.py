@@ -37,7 +37,7 @@ def get(order_id: int, user: User = Depends(current_user), db: Session = Depends
 
 @router.post("/{order_id}/status", response_model=OrderOut)
 def set_status(order_id: int, data: OrderStatusIn, user: User = Depends(require_roles(Role.seller)), db: Session = Depends(get_db)):
-    return svc.advance(db, user, order_id, data.status)
+    return svc.advance(db, user, order_id, data.status, data.pickup_in_minutes)
 
 
 @router.post("/{order_id}/cancel", response_model=OrderOut)

@@ -1,0 +1,70 @@
+from datetime import UTC, datetime
+
+from sqlalchemy import Select, func, select, update
+from sqlalchemy.orm import Session
+
+from app.core.errors import NotFound
+from app.models import Notification, Order, User
+
+
+def human_duration(minutes: int) -> str:
+    if minutes < 60:
+        return f"{minutes} minutes"
+    if minutes < 1440:
+        h, m = divmod(minutes, 60)
+        return f"{h} hour{'s' if h != 1 else ''}" + (f" {m} minutes" if m else "")
+    d = round(minutes / 1440)
+    return f"{d} day{'s' if d != 1 else ''}"
+
+
+def notify(db: Session, user_id: int, order: Order, kind: str, title: str, message: str) -> Notification:
+    n = Notification(user_id=user_id, order_id=order.id, kind=kind, title=title, message=message[:400])
+    db.add(n)
+    return n  # committed together with the order change
+
+
+def order_confirmed(db: Session, order: Order, shop: str, minutes: int) -> None:
+    notify(
+        db,
+        order.buyer_id,
+        order,
+        "order_confirmed",
+        f"Order #{order.id} confirmed",
+        f"{shop} confirmed your order #{order.id}. Estimated time until pickup: about {human_duration(minutes)}.",
+    )
+
+
+def order_ready(db: Session, order: Order, shop: str) -> None:
+    notify(db, order.buyer_id, order, "order_ready", f"Order #{order.id} is ready", f"Your order #{order.id} is ready for pick up at {shop}.")
+
+
+def order_cancelled_by_seller(db: Session, order: Order, shop: str, reason: str | None) -> None:
+    extra = f" Reason: {reason}" if reason else ""
+    notify(db, order.buyer_id, order, "order_cancelled", f"Order #{order.id} cancelled", f"{shop} cancelled your order #{order.id}.{extra}")
+
+
+def list_stmt(user: User, unread_only: bool = False) -> Select:
+    stmt = select(Notification).where(Notification.user_id == user.id)
+    if unread_only:
+        stmt = stmt.where(Notification.read_at.is_(None))
+    return stmt.order_by(Notification.id.desc())
+
+
+def unread_count(db: Session, user: User) -> int:
+    return db.scalar(select(func.count()).select_from(Notification).where(Notification.user_id == user.id, Notification.read_at.is_(None))) or 0
+
+
+def mark_read(db: Session, user: User, nid: int) -> Notification:
+    n = db.scalar(select(Notification).where(Notification.id == nid, Notification.user_id == user.id))
+    if not n:
+        raise NotFound("Notification not found")
+    if n.read_at is None:
+        n.read_at = datetime.now(UTC)
+        db.commit()
+    return n
+
+
+def mark_all_read(db: Session, user: User) -> int:
+    res = db.execute(update(Notification).where(Notification.user_id == user.id, Notification.read_at.is_(None)).values(read_at=datetime.now(UTC)))
+    db.commit()
+    return res.rowcount or 0

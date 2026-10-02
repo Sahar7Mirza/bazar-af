@@ -131,6 +131,7 @@ class OrderOut(ORM):
     total_afn: Decimal
     buyer_note: str | None
     cancel_reason: str | None
+    estimated_pickup_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
     items: list[OrderItemOut]
@@ -138,6 +139,8 @@ class OrderOut(ORM):
 
 class OrderStatusIn(BaseModel):
     status: Literal["confirmed", "ready", "completed"]
+    # Only used when confirming: how long until the buyer can pick the order up (default 60 minutes).
+    pickup_in_minutes: int | None = Field(default=None, ge=5, le=10080)
 
 
 class CancelIn(BaseModel):

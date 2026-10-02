@@ -14,8 +14,9 @@ export type OrderStatus = "pending" | "confirmed" | "ready" | "completed" | "can
 export interface OrderItem { product_id: number; product_name: string; unit_price_afn: string; quantity: number; line_total_afn: string }
 export interface Order {
   id: number; buyer_id: number; seller_id: number; status: OrderStatus; payment_preference: "cash" | "mobile_money"; mobile_money_provider: string | null;
-  payment_status: string; total_afn: string; buyer_note: string | null; cancel_reason: string | null; created_at: string; updated_at: string; items: OrderItem[];
+  payment_status: string; total_afn: string; buyer_note: string | null; cancel_reason: string | null; estimated_pickup_at: string | null; created_at: string; updated_at: string; items: OrderItem[];
 }
 export interface Question { id: number; construct: string; code: string; text_en: string; text_fa: string | null; position: number }
 export const DISTRICTS = [...Array.from({ length: 22 }, (_, i) => `PD${i + 1}`), "Other"];
 export const PROVIDERS = ["M-Paisa", "HesabPay", "Afghan Wireless Mobile Money", "MoneyPay", "Other"];
+export interface AppNotification { id: number; order_id: number | null; kind: string; title: string; message: string; read_at: string | null; created_at: string }

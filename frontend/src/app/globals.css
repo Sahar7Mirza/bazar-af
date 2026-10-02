@@ -78,3 +78,6 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .foot { background: var(--bg-alt); padding: 36px 0; font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line); }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 @media (max-width: 600px) { .section { padding: 48px 0; } .hero { padding: 56px 0 40px; } .likert label span { display: block; } }
+
+.bell { position: relative; text-decoration: none; font-size: 1.05rem; line-height: 1; } .bell .dot { position: absolute; top: -7px; right: -9px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 999px; background: var(--bad); color: #fff; font-size: .68rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; }
+.notif { display: block; width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; } .notif.unread { border-left: 3px solid var(--brand); } .notif h3 { font-size: 1rem; margin: 0 0 4px; } .notif p { margin: 0 0 6px; }
