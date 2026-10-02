@@ -85,3 +85,23 @@ def test_notifications_are_private_and_need_login(client, db):
     assert client.post(f"/api/v1/notifications/{nid}/read", headers=other).status_code == 404
     assert client.get("/api/v1/notifications").status_code == 401
     assert client.get("/api/v1/notifications/unread-count").status_code == 401
+
+
+def test_marketplace_analytics_buyers_and_weekly(client, db):
+    su, sp = make_seller(db, "s@x.af")
+    make_user(db, "b@x.af", Role.buyer)
+    make_user(db, "b2@x.af", Role.buyer)
+    make_user(db, "a@x.af", Role.admin)
+    p = make_product(db, sp, "Bread", "25.00", 50)
+
+    def body(pref, prov=None):
+        return {"items": [{"product_id": p.id, "quantity": 1}], "payment_preference": pref, **({"mobile_money_provider": prov} if prov else {})}
+
+    h1, h2 = token(client, "b@x.af"), token(client, "b2@x.af")
+    client.post("/api/v1/orders", json=body("mobile_money", "M-Paisa"), headers=h1)
+    client.post("/api/v1/orders", json=body("cash"), headers=h1)
+    client.post("/api/v1/orders", json=body("cash"), headers=h2)
+    r = client.get("/api/v1/admin/analytics/marketplace", headers=token(client, "a@x.af")).json()
+    assert r["orders"] == 3 and r["mobile_money_share_pct"] == 33.3
+    assert r["buyers"] == {"total": 2, "mobile_money": 1, "share_pct": 50.0}
+    assert len(r["weekly"]) == 1 and r["weekly"][0]["total"] == 3 and r["weekly"][0]["mobile_money"] == 1

@@ -23,17 +23,11 @@ test("admin lists users, searches and sees audit entries", async ({ page }) => {
   await expect(page.locator("tbody tr").first()).toContainText("auth.login");
 });
 
-test("research dashboard shows statistics from the survey", async ({ page }) => {
+test("research page shows mobile-money adoption from real orders", async ({ page }) => {
   await login(page, "admin@demo.bazar.af");
   await page.goto("/admin/research");
-  await expect(page.getByText("Demo data.")).toBeVisible();
-  await expect(page.getByRole("progressbar", { name: "Progress towards target" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "What drives willingness to adopt?" })).toBeVisible();
-  await expect(page.getByText(/OLS regression/)).toBeVisible();
-  await expect(page.getByRole("table", { name: /Correlation matrix/ })).toBeVisible();
-  await page.getByLabel("Respondent type", { exact: true }).selectOption("buyer");
-  await expect(page.getByText(/n = \d+/).first()).toBeVisible();
-  const csv = await page.request.get("/api/proxy/admin/research/export.csv");
-  expect(csv.status()).toBe(200);
-  expect(csv.headers()["content-type"]).toContain("text/csv");
+  await expect(page.getByRole("heading", { name: "Orders choosing mobile money" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Buyers using mobile money" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Which mobile-money provider?" })).toBeVisible();
+  await expect(page.getByText(/No money moves on Bazar.af/)).toBeVisible();
 });

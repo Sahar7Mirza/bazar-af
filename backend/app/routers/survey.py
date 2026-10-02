@@ -104,6 +104,16 @@ def marketplace(db: Session = Depends(get_db)):
         .where(live)
         .group_by(Category.name, Order.payment_preference)
     ).all()
+    buyers_total = db.scalar(select(func.count(func.distinct(Order.buyer_id))).where(live)) or 0
+    buyers_mm = db.scalar(select(func.count(func.distinct(Order.buyer_id))).where(live, Order.payment_preference == "mobile_money")) or 0
+    week = func.date_trunc("week", Order.created_at)
+    weekly_rows = db.execute(
+        select(week, Order.payment_preference, func.count()).where(live).group_by(week, Order.payment_preference).order_by(week)
+    ).all()
+    weeks: dict[str, dict[str, int]] = {}
+    for w, p, n in weekly_rows:
+        weeks.setdefault(w.date().isoformat(), {"cash": 0, "mobile_money": 0})[getattr(p, "value", p)] = n
+    weekly = [{"week": k, **v, "total": v["cash"] + v["mobile_money"]} for k, v in list(weeks.items())[-12:]]
     pref = {getattr(k, "value", k): v for k, v in pref.items()}
     total = sum(pref.values())
     mm = pref.get("mobile_money", 0)
@@ -119,6 +129,8 @@ def marketplace(db: Session = Depends(get_db)):
         "preference": pref,
         "mobile_money_share_pct": round(mm / total * 100, 1) if total else 0,
         "providers": prov,
+        "buyers": {"total": buyers_total, "mobile_money": buyers_mm, "share_pct": round(buyers_mm / buyers_total * 100, 1) if buyers_total else 0},
+        "weekly": weekly,
         "by_district": table(dist),
         "by_category": table(cat),
     }

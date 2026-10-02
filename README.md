@@ -10,7 +10,7 @@ A marketplace for micro and small enterprises (MSEs) in Kabul, combined with a *
 | Roles | **Buyer**, **Seller** (needs admin approval), **Administrator** |
 | Stack | PostgreSQL 16 · FastAPI (Python 3.11, SQLAlchemy 2, Alembic, Pydantic v2) · Next.js 16 + React 19 (TypeScript) · Docker |
 | UI | Apple.com-inspired design, responsive, dark mode, WCAG-minded (axe-checked), loading / error / empty states |
-| Research | TAM/UTAUT survey -> descriptives, Cronbach's α, correlations, OLS regression, dashboard, CSV export |
+| Research | Mobile-money adoption measured from the Cash / Mobile Money choice at checkout: share of orders and buyers, by provider, week, district and category |
 
 > Deploying online: see [docs/13-deployment.md](docs/13-deployment.md) (Docker, or Vercel + Neon).
 
@@ -35,7 +35,7 @@ Captured from the running app with the seeded demo data (all data is synthetic).
 | ![Mobile](docs/img/14-mobile-home.png) | ![Dark mode](docs/img/15-dark-products.png) |
 | Responsive layout on a phone | Dark mode follows the system setting |
 
-Research dashboard (descriptives, reliability, regression, correlations):
+Research page (mobile-money adoption from real orders; the screenshot below predates this change):
 
 ![Research dashboard](docs/img/11-admin-research.png)
 
@@ -64,7 +64,7 @@ More: [local install without Docker](docs/13-deployment.md) · [testing](docs/12
 - **RBAC in two steps:** role dependency on the route, then object-level ownership check in the service (other users' resources return 404).
 - Server-side validation everywhere (Pydantic); prices and totals computed on the server; row locks prevent overselling (tested with concurrent requests).
 - Pagination on every list, `created_at`/`updated_at` on every table, append-only `audit_log`, JSON logs with request IDs, one error format, security headers, CORS allow-list.
-- Survey is anonymous: no user id / IP / phone stored; small groups are suppressed; exports contain no identifiers.
+- The anonymous survey API (no user id / IP / phone stored) still exists in the backend but has no page in the web app; adoption is measured from checkout preferences instead.
 - Secrets only via environment variables; `.env` is git-ignored; `.env.example` documents everything; production refuses weak secrets and refuses to seed.
 
 ## Documentation
@@ -90,5 +90,5 @@ Feature branches (`feature/...`) merged with `--no-ff` into `main`; tests run be
 ## Known limitations
 - Dari (RTL) interface is planned; the questionnaire already carries Dari text (please proofread before real use).
 - No email/SMS verification, password reset or image uploads yet.
-- In-memory survey rate limiter (single process). Survey data in the demo database is **synthetic**.
+- Demo orders and the dormant survey data are **synthetic**.
 - Docker images are not yet built/verified (see [deployment notes](docs/13-deployment.md#verification-status)).
