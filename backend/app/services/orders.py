@@ -1,3 +1,4 @@
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 
 from sqlalchemy import Select, select
@@ -6,7 +7,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.core.errors import AppError, Conflict, Forbidden, NotFound
 from app.models import Order, OrderItem, OrderStatus, PaymentPreference, Product, ProductStatus, Role, SellerProfile, SellerStatus, User
 from app.schemas.catalog import OrderIn
-from app.services import audit
+from app.services import audit, notifications
 
 # Legal seller-driven transitions. Cancellation is handled separately.
 NEXT = {OrderStatus.pending: OrderStatus.confirmed, OrderStatus.confirmed: OrderStatus.ready, OrderStatus.ready: OrderStatus.completed}
@@ -112,12 +113,25 @@ def get_order(db: Session, user: User, oid: int, lock: bool = False) -> Order:
     raise NotFound("Order not found")  # never reveal someone else's order exists
 
 
-def advance(db: Session, seller: User, oid: int, target: str) -> Order:
+DEFAULT_PICKUP_MINUTES = 60
+
+
+def _shop_name(db: Session, o: Order) -> str:
+    return db.get(SellerProfile, o.seller_id).business_name
+
+
+def advance(db: Session, seller: User, oid: int, target: str, pickup_in_minutes: int | None = None) -> Order:
     o = get_order(db, seller, oid, lock=True)
     if NEXT.get(o.status) != OrderStatus(target):
         raise Conflict(f"Cannot move an order from {o.status.value} to {target}", code="illegal_transition")
     before = o.status.value
     o.status = OrderStatus(target)
+    if o.status == OrderStatus.confirmed:
+        minutes = pickup_in_minutes or DEFAULT_PICKUP_MINUTES
+        o.estimated_pickup_at = datetime.now(UTC) + timedelta(minutes=minutes)
+        notifications.order_confirmed(db, o, _shop_name(db, o), minutes)
+    elif o.status == OrderStatus.ready:
+        notifications.order_ready(db, o, _shop_name(db, o))
     audit.record(db, "order.status", actor_id=seller.id, entity_type="order", entity_id=o.id, detail={"from": before, "to": target})
     db.commit()
     return o
@@ -132,6 +146,8 @@ def cancel(db: Session, user: User, oid: int, reason: str | None) -> Order:
         p = db.get(Product, it.product_id, with_for_update=True)
         p.stock_qty += it.quantity
     o.status, o.cancel_reason = OrderStatus.cancelled, reason
+    if user.role == Role.seller:
+        notifications.order_cancelled_by_seller(db, o, _shop_name(db, o), reason)
     audit.record(db, "order.cancel", actor_id=user.id, entity_type="order", entity_id=o.id, detail={"by": user.role.value})
     db.commit()
     return o

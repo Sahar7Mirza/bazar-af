@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
 import { useCart } from "@/lib/cart";
 import { useSession } from "./Session";
 
@@ -10,6 +11,16 @@ export function Nav() {
   const path = usePathname();
   const cart = useCart();
   const [open, setOpen] = useState(false);
+  const [unread, setUnread] = useState(0);
+  const uid = user?.id;
+  useEffect(() => {  // poll the unread count every 30 s (and whenever the page changes) so a "confirmed / ready" alert shows up on its own
+    if (!uid) return;
+    let live = true;
+    const load = () => api<{ unread: number }>("notifications/unread-count").then((r) => live && setUnread(r.unread)).catch(() => {});
+    load();
+    const t = setInterval(load, 30000);
+    return () => { live = false; clearInterval(t); };
+  }, [uid, path]);
   const n = cart.reduce((s, l) => s + l.qty, 0);
   const cur = (href: string) => (path === href || (href !== "/" && path.startsWith(href)) ? "page" : undefined);
   const home = user?.role === "admin" ? "/admin" : user?.role === "seller" ? "/seller" : null;
@@ -26,6 +37,7 @@ export function Nav() {
         </nav>
         <div className="nav-right">
           {(!user || user.role === "buyer") && <Link href="/cart" aria-label={`Cart, ${n} items`}>Cart{n > 0 ? ` (${n})` : ""}</Link>}
+          {user && <Link href="/notifications" className="bell" aria-label={unread ? `Notifications, ${unread} unread` : "Notifications"}>🔔{unread > 0 && uid && <span className="dot">{unread > 9 ? "9+" : unread}</span>}</Link>}
           {loading ? null : user ? (<><span className="muted small">{user.full_name.split(" ")[0]}</span><button className="link" onClick={logout}>Sign out</button></>) : (<><Link href="/login">Sign in</Link><Link href="/register" className="btn sm">Join</Link></>)}
         </div>
       </div>

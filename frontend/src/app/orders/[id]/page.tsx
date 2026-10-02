@@ -8,6 +8,7 @@ import { api, ApiError } from "@/lib/api";
 import { afn, dateTime, pref } from "@/lib/format";
 import type { Order } from "@/lib/types";
 
+const ETAS: [string, string][] = [["15", "15 minutes"], ["30", "30 minutes"], ["60", "1 hour"], ["120", "2 hours"], ["240", "4 hours"], ["1440", "Tomorrow (24 hours)"]];
 const NEXT: Record<string, [string, string] | undefined> = { pending: ["confirmed", "Confirm order"], confirmed: ["ready", "Mark ready"], ready: ["completed", "Mark completed"] };
 const FLOW = ["pending", "confirmed", "ready", "completed"];
 
@@ -19,6 +20,7 @@ function Detail() {
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [reason, setReason] = useState("");
+  const [eta, setEta] = useState("60");
   async function act(path: string, body: unknown) {
     setBusy(true); setErr(null);
     try { await api(`orders/${id}/${path}`, { method: "POST", body }); o.reload(); } catch (x) { setErr(x instanceof ApiError ? x.message : "Action failed"); } finally { setBusy(false); }
@@ -39,6 +41,7 @@ function Detail() {
               <div className="row between"><span className="muted">Placed</span><span>{dateTime(d.created_at)}</span></div>
               <div className="row between"><span className="muted">Payment preference</span><strong>{pref(d.payment_preference, d.mobile_money_provider)}</strong></div>
               <div className="row between"><span className="muted">Payment status</span><span className="chip">Not processed (simulated)</span></div>
+              {d.estimated_pickup_at && ["confirmed", "ready"].includes(d.status) && <div className="row between"><span className="muted">{d.status === "ready" ? "Ready for pick up" : "Estimated pick-up"}</span><strong>{d.status === "ready" ? "Now" : dateTime(d.estimated_pickup_at)}</strong></div>}
               {d.buyer_note && <div><span className="muted">Buyer note</span><p>{d.buyer_note}</p></div>}
               {d.cancel_reason && <div><span className="muted">Cancellation reason</span><p>{d.cancel_reason}</p></div>}
             </div>
@@ -50,7 +53,8 @@ function Detail() {
             {(next || canCancel) && (
               <div className="card" style={{ marginTop: 20 }}>
                 <div className="row">
-                  {next && <button className="btn" disabled={busy} onClick={() => act("status", { status: next[0] })}>{next[1]}</button>}
+                  {next && d.status === "pending" && <><label htmlFor="eta" className="muted small">Ready for pick up in</label><select id="eta" style={{ width: "auto" }} value={eta} onChange={(e) => setEta(e.target.value)}>{ETAS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></>}
+                  {next && <button className="btn" disabled={busy} onClick={() => act("status", next[0] === "confirmed" ? { status: next[0], pickup_in_minutes: Number(eta) } : { status: next[0] })}>{next[1]}</button>}
                   {canCancel && <><label className="sr" htmlFor="why">Reason</label><input id="why" style={{ flex: 1, minWidth: 180 }} placeholder="Reason (optional)" value={reason} onChange={(e) => setReason(e.target.value)} /><button className="btn danger" disabled={busy} onClick={() => act("cancel", { reason: reason || null })}>Cancel order</button></>}
                 </div>
               </div>

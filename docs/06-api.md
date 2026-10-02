@@ -29,7 +29,8 @@ Base path `/api/v1`. JSON only. Auth: `Authorization: Bearer <access JWT>` (the 
 | Orders | POST `/orders` (single seller; stock check; payment preference) | buyer |
 | | GET `/orders` (own: buyer's or seller's) | buyer, seller |
 | | GET `/orders/{id}` | owner buyer / owner seller / admin |
-| | POST `/orders/{id}/status` (confirm, ready, complete) | seller (owner) |
+| | POST `/orders/{id}/status` (confirm, ready, complete). Confirming accepts optional `pickup_in_minutes` (5-10080, default 60) and sets `estimated_pickup_at` | seller (owner) |
+| Notifications | GET `/notifications` (`?unread=true`, paginated), GET `/notifications/unread-count`, POST `/notifications/{id}/read`, POST `/notifications/read-all` | any signed-in user (own only) |
 | | POST `/orders/{id}/cancel` | buyer (pending) / seller |
 | Admin | GET `/admin/users`, PATCH `/admin/users/{id}` (activate/deactivate) | admin |
 | | GET `/admin/sellers`, POST `/admin/sellers/{id}/approve` / `reject` | admin |
@@ -41,3 +42,16 @@ Base path `/api/v1`. JSON only. Auth: `Authorization: Bearer <access JWT>` (the 
 
 Status codes: 200/201/204; 400 validation; 401 unauthenticated; 403 forbidden; 404 (also for other users' resources); 409 conflict (email taken, insufficient stock, illegal state change); 422 schema; 429 rate limit.
 Interactive docs: `/docs` (Swagger) and `/redoc`, generated from Pydantic schemas.
+
+
+## Order notifications
+
+When a seller changes an order the buyer gets an in-app notification (bell in the top bar, page `/notifications`):
+
+| Event | Message |
+|---|---|
+| Seller confirms | "<shop> confirmed your order #N. Estimated time until pickup: about <duration>." (the seller picks the estimate; the order page shows the exact time) |
+| Seller marks ready | "Your order #N is ready for pick up at <shop>." |
+| Seller cancels | "<shop> cancelled your order #N. Reason: ..." |
+
+Notifications are stored in the `notifications` table (migration 0003). Email delivery is not implemented yet; it can be added without changing the table.
