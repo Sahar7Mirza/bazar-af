@@ -1261,6 +1261,185 @@
         }
       }
     },
+    "/api/v1/me/interests": {
+      "get": {
+        "tags": [
+          "recommendations"
+        ],
+        "summary": "My Interests",
+        "operationId": "my_interests_api_v1_me_interests_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "recommendations"
+        ],
+        "summary": "Save Interests",
+        "operationId": "save_interests_api_v1_me_interests_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InterestsIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/recommendations": {
+      "get": {
+        "tags": [
+          "recommendations"
+        ],
+        "summary": "Recommendations",
+        "description": "Personalised for signed-in buyers (interests + past orders); popular products for everyone else.",
+        "operationId": "recommendations_api_v1_recommendations_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 24,
+              "minimum": 1,
+              "default": 8,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RecommendedProductOut"
+                  },
+                  "title": "Response Recommendations Api V1 Recommendations Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/products/{product_id}/similar": {
+      "get": {
+        "tags": [
+          "recommendations"
+        ],
+        "summary": "Similar",
+        "operationId": "similar_api_v1_products__product_id__similar_get",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Product Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 12,
+              "minimum": 1,
+              "default": 4,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PublicProductOut"
+                  },
+                  "title": "Response Similar Api V1 Products  Product Id  Similar Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/admin/users": {
       "get": {
         "tags": [
@@ -2641,6 +2820,20 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "InterestsIn": {
+        "properties": {
+          "category_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "maxItems": 8,
+            "title": "Category Ids"
+          }
+        },
+        "type": "object",
+        "title": "InterestsIn"
+      },
       "LoginIn": {
         "properties": {
           "email": {
@@ -2679,6 +2872,17 @@
             ],
             "title": "Order Id"
           },
+          "product_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Id"
+          },
           "kind": {
             "type": "string",
             "title": "Kind"
@@ -2713,6 +2917,7 @@
         "required": [
           "id",
           "order_id",
+          "product_id",
           "kind",
           "title",
           "message",
@@ -3334,6 +3539,124 @@
           "updated_at"
         ],
         "title": "PublicProductOut"
+      },
+      "RecommendedProductOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "seller_id": {
+            "type": "integer",
+            "title": "Seller Id"
+          },
+          "category_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "price_afn": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Price Afn"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit"
+          },
+          "stock_qty": {
+            "type": "integer",
+            "title": "Stock Qty"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "hidden_by_admin": {
+            "type": "boolean",
+            "title": "Hidden By Admin"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "seller_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seller Name"
+          },
+          "district": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "District"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "seller_id",
+          "category_id",
+          "name",
+          "description",
+          "price_afn",
+          "unit",
+          "stock_qty",
+          "status",
+          "hidden_by_admin",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "RecommendedProductOut"
       },
       "RefreshIn": {
         "properties": {

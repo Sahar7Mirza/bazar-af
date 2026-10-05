@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { ProductCard } from "@/components/ProductCard";
 import { EmptyState, ErrorState, LoadingGrid, Pager, useLoad } from "@/components/ui";
 import { api } from "@/lib/api";
-import { emojiFor } from "@/lib/emoji";
+import { categoryIcon } from "@/components/Icon";
 import { DISTRICTS, type Category, type Page, type Product } from "@/lib/types";
 
 function Catalogue() {
@@ -34,9 +34,9 @@ function Catalogue() {
         {active && <button className="link" onClick={() => router.push("/products")}>Clear filters</button>}
       </div>
       {res.loading ? <LoadingGrid n={8} /> : res.error ? <ErrorState error={res.error} retry={res.reload} /> : !res.data || res.data.items.length === 0 ? (
-        <EmptyState emoji="🔍" title="No products found" text={active ? "Try a different search or clear the filters." : "Nothing is listed yet."} action={active ? <button className="btn quiet" onClick={() => router.push("/products")}>Clear filters</button> : undefined} />
+        <EmptyState icon="search" title="No products found" text={active ? "Try a different search or clear the filters." : "Nothing is listed yet."} action={active ? <button className="btn quiet" onClick={() => router.push("/products")}>Clear filters</button> : undefined} />
       ) : (<>
-        <div className="grid g3">{res.data.items.map((p) => <ProductCard key={p.id} p={p} emoji={emojiFor(catName.get(p.category_id ?? -1))} />)}</div>
+        <div className="grid g3">{res.data.items.map((p) => <ProductCard key={p.id} p={p} icon={categoryIcon(catName.get(p.category_id ?? -1))} />)}</div>
         <Pager page={res.data} onPage={(n) => set({ page: String(n) })} />
       </>)}
     </div>

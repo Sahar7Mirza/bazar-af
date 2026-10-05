@@ -44,3 +44,13 @@ def client_ip(request: Request) -> str | None:
         return str(ipaddress.ip_address(host)) if host else None
     except ValueError:  # e.g. unix sockets or the test client; the audit column only accepts real IPs
         return None
+
+
+def optional_user(creds: HTTPAuthorizationCredentials | None = Depends(bearer), db: Session = Depends(get_db)) -> User | None:
+    """Like current_user but returns None for anonymous visitors (or an invalid token) instead of failing."""
+    if creds is None:
+        return None
+    try:
+        return current_user(creds, db)
+    except Unauthorized:
+        return None

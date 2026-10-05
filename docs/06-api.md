@@ -30,6 +30,7 @@ Base path `/api/v1`. JSON only. Auth: `Authorization: Bearer <access JWT>` (the 
 | | GET `/orders` (own: buyer's or seller's) | buyer, seller |
 | | GET `/orders/{id}` | owner buyer / owner seller / admin |
 | | POST `/orders/{id}/status` (confirm, ready, complete). Confirming accepts optional `pickup_in_minutes` (5-10080, default 60) and sets `estimated_pickup_at` | seller (owner) |
+| Interests and recommendations | GET/PUT `/me/interests` (buyer, max 8 categories), GET `/recommendations?limit=` (personalised for signed-in buyers, popular for everyone else), GET `/products/{id}/similar` | buyer / public |
 | Notifications | GET `/notifications` (`?unread=true`, paginated), GET `/notifications/unread-count`, POST `/notifications/{id}/read`, POST `/notifications/read-all` | any signed-in user (own only) |
 | | POST `/orders/{id}/cancel` | buyer (pending) / seller |
 | Admin | GET `/admin/users`, PATCH `/admin/users/{id}` (activate/deactivate) | admin |
@@ -55,3 +56,9 @@ When a seller changes an order the buyer gets an in-app notification (bell in th
 | Seller cancels | "<shop> cancelled your order #N. Reason: ..." |
 
 Notifications are stored in the `notifications` table (migration 0003). Email delivery is not implemented yet; it can be added without changing the table.
+
+## Recommendations and interests
+
+Rule-based and explainable (no training data needed). Each candidate product scores: +3 if its category is one of the buyer's interests, +2 if the buyer has ordered from that category before, up to +1 for popularity (share of non-cancelled orders), up to +0.5 for freshness, and -1 if the buyer already ordered that exact product. The `reason` field names the strongest signal ("Matches your interest in Food & Bakery", "Because you ordered ... before", or "Popular in Kabul"). Product pages show similar products (same category first, then popular items).
+
+When a seller publishes a product (create as active, or switch from hidden to active), buyers who follow that category get a `new_product` notification (up to 500 recipients per product).

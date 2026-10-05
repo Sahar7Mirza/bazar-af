@@ -93,6 +93,14 @@ class PublicProductOut(ProductOut):
     district: str | None = None
 
 
+class RecommendedProductOut(PublicProductOut):
+    reason: str | None = None  # why this product is shown, e.g. "Matches your interest in Food & Bakery"
+
+
+class InterestsIn(BaseModel):
+    category_ids: list[int] = Field(default_factory=list, max_length=8)
+
+
 class OrderItemIn(BaseModel):
     product_id: int
     quantity: int = Field(ge=1, le=10_000)

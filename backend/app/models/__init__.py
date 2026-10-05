@@ -185,10 +185,20 @@ class Notification(Base):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     order_id: Mapped[int | None] = mapped_column(ForeignKey("orders.id", ondelete="CASCADE"))
-    kind: Mapped[str] = mapped_column(String(30))  # order_confirmed | order_ready | order_cancelled
+    product_id: Mapped[int | None] = mapped_column(ForeignKey("products.id", ondelete="CASCADE"))
+    kind: Mapped[str] = mapped_column(String(30))  # order_confirmed | order_ready | order_cancelled | new_product
     title: Mapped[str] = mapped_column(String(120))
     message: Mapped[str] = mapped_column(String(400))
     read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class UserInterest(Base):
+    """A category a buyer said they are interested in; drives recommendations and "new in your interests" alerts."""
+
+    __tablename__ = "user_interests"
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    category_id: Mapped[int] = mapped_column(ForeignKey("categories.id", ondelete="CASCADE"), primary_key=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 

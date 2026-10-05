@@ -6,7 +6,8 @@ import { useSession } from "@/components/Session";
 import { Alert, ErrorState, LoadingRows, useLoad } from "@/components/ui";
 import { api } from "@/lib/api";
 import { cart } from "@/lib/cart";
-import { emojiFor } from "@/lib/emoji";
+import { Icon, categoryIcon } from "@/components/Icon";
+import { Similar } from "@/components/Recommended";
 import { afn } from "@/lib/format";
 import type { Category, Product } from "@/lib/types";
 
@@ -31,7 +32,7 @@ export default function ProductPage() {
     <div className="wrap page">
       <p className="small"><Link href="/products">← All products</Link></p>
       <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: 40, alignItems: "start" }}>
-        <div className="thumb" style={{ fontSize: "6rem", aspectRatio: "1" }} aria-hidden="true">{emojiFor(cat)}</div>
+        <div className="thumb" style={{ aspectRatio: "1" }} aria-hidden="true"><Icon name={categoryIcon(cat)} size={96} /></div>
         <div>
           {cat && <p className="eyebrow">{cat}</p>}
           <h1 style={{ fontSize: "2.4rem" }}>{d.name}</h1>
@@ -50,6 +51,7 @@ export default function ProductPage() {
           <p className="muted small" style={{ marginTop: 16 }}>Payment is arranged directly with the seller. Bazar.af records your preference only.</p>
         </div>
       </div>
+      <Similar productId={d.id} />
     </div>
   );
 }

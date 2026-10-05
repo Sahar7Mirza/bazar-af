@@ -13,7 +13,7 @@ export default function Audit() {
   return (
     <AdminShell title="Audit log">
       <div className="row" style={{ marginBottom: 16 }}><label className="sr" htmlFor="act">Filter by action</label><input id="act" style={{ maxWidth: 260 }} placeholder="e.g. auth.login_failed" value={action} onChange={(e) => { setAction(e.target.value.trim()); setPage(1); }} /></div>
-      {res.loading ? <LoadingRows /> : res.error ? <ErrorState error={res.error} retry={res.reload} /> : !res.data?.items.length ? <EmptyState emoji="📜" title="No events" /> : (<>
+      {res.loading ? <LoadingRows /> : res.error ? <ErrorState error={res.error} retry={res.reload} /> : !res.data?.items.length ? <EmptyState icon="audit" title="No events" /> : (<>
         <div className="table-wrap"><table>
           <thead><tr><th>When</th><th>Action</th><th>Actor</th><th>Entity</th><th>Detail</th></tr></thead>
           <tbody>{res.data.items.map((r) => <tr key={r.id}><td>{dateTime(r.created_at)}</td><td><code>{r.action}</code></td><td>{r.actor_id ? `#${r.actor_id}` : "—"}</td><td>{r.entity_type ? `${r.entity_type} #${r.entity_id}` : "—"}</td><td className="small muted">{r.detail ? JSON.stringify(r.detail) : ""}</td></tr>)}</tbody>

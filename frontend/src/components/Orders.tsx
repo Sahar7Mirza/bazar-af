@@ -20,7 +20,7 @@ export function OrderTable({ endpoint = "orders", showBuyer = false }: { endpoin
         </select>
       </div>
       {res.loading ? <LoadingRows /> : res.error ? <ErrorState error={res.error} retry={res.reload} /> : !res.data?.items.length ? (
-        <EmptyState emoji="📦" title="No orders yet" text={status ? "No orders with this status." : "Orders will show up here."} />
+        <EmptyState icon="package" title="No orders yet" text={status ? "No orders with this status." : "Orders will show up here."} />
       ) : (<>
         <div className="table-wrap"><table>
           <thead><tr><th>Order</th><th>Date</th>{showBuyer && <th>Buyer</th>}<th>Payment preference</th><th>Status</th><th className="num">Total</th></tr></thead>

@@ -1,4 +1,5 @@
 "use client";
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 import { ApiError } from "@/lib/api";
@@ -13,14 +14,14 @@ export function ErrorState({ error, retry }: { error: unknown; retry?: () => voi
   const e = error instanceof ApiError ? error : null;
   return (
     <div className="state" role="alert">
-      <div className="emoji" aria-hidden="true">⚠️</div><h3>{e?.status === 403 ? "You don’t have access to this" : "Something went wrong"}</h3>
+      <div className="state-icon"><Icon name="alert" size={36} /></div><h3>{e?.status === 403 ? "You don’t have access to this" : "Something went wrong"}</h3>
       <p>{e?.message ?? "Please try again."}</p>{e?.requestId && <p className="small">Reference: {e.requestId}</p>}
       {retry && <button className="btn quiet" onClick={retry}>Try again</button>}
     </div>
   );
 }
-export function EmptyState({ title, text, action, emoji = "🗂️" }: { title: string; text?: string; action?: ReactNode; emoji?: string }) {
-  return <div className="state"><div className="emoji" aria-hidden="true">{emoji}</div><h3>{title}</h3>{text && <p>{text}</p>}{action}</div>;
+export function EmptyState({ title, text, action, icon = "folder" }: { title: string; text?: string; action?: ReactNode; icon?: string }) {
+  return <div className="state"><div className="state-icon"><Icon name={icon} size={36} /></div><h3>{title}</h3>{text && <p>{text}</p>}{action}</div>;
 }
 export function Alert({ kind = "info", children }: { kind?: "bad" | "ok" | "info" | "warn"; children: ReactNode }) { return <div className={`alert ${kind}`} role={kind === "bad" ? "alert" : "status"}>{children}</div>; }
 
@@ -63,7 +64,7 @@ export function TabNav({ items, current }: { items: [string, string][]; current:
 
 export function Guard({ roles, user, loading, children }: { roles: string[]; user: { role: string } | null; loading: boolean; children: ReactNode }) {
   if (loading) return <div className="wrap page"><LoadingRows /></div>;
-  if (!user) return <div className="wrap page"><EmptyState emoji="🔒" title="Please sign in" text="You need an account to see this page." action={<Link className="btn" href="/login">Sign in</Link>} /></div>;
-  if (!roles.includes(user.role)) return <div className="wrap page"><EmptyState emoji="🚫" title="Not available for your account type" action={<Link className="btn quiet" href="/">Back home</Link>} /></div>;
+  if (!user) return <div className="wrap page"><EmptyState icon="lock" title="Please sign in" text="You need an account to see this page." action={<Link className="btn" href="/login">Sign in</Link>} /></div>;
+  if (!roles.includes(user.role)) return <div className="wrap page"><EmptyState icon="ban" title="Not available for your account type" action={<Link className="btn quiet" href="/">Back home</Link>} /></div>;
   return <>{children}</>;
 }

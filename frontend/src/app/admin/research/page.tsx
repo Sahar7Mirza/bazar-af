@@ -18,7 +18,7 @@ export default function Research() {
   return (
     <AdminShell title="Mobile money adoption">
       {m.loading ? <LoadingRows n={4} /> : m.error || !d ? <ErrorState error={m.error} retry={m.reload} /> : d.orders === 0 ? (
-        <EmptyState emoji="🛍️" title="No orders yet" text="Adoption figures appear here as buyers place orders and choose Cash or Mobile Money at checkout." />
+        <EmptyState icon="bag" title="No orders yet" text="Adoption figures appear here as buyers place orders and choose Cash or Mobile Money at checkout." />
       ) : (<>
         <p className="muted">Based on the payment preference buyers choose at checkout (cancelled orders excluded). No money moves on Bazar.af, so these are stated preferences, not payments.</p>
         <div className="grid g3" style={{ marginTop: 16 }}>
@@ -29,18 +29,18 @@ export default function Research() {
         </div>
         <div className="grid g2" style={{ marginTop: 20 }}>
           <div className="card"><h3>Which mobile-money provider?</h3>
-            {Object.keys(d.providers).length === 0 ? <EmptyState emoji="📱" title="No mobile-money orders yet" /> :
+            {Object.keys(d.providers).length === 0 ? <EmptyState icon="phone" title="No mobile-money orders yet" /> :
               <BarChart label="Orders by mobile money provider" max={Math.max(1, ...Object.values(d.providers))} data={Object.entries(d.providers).sort((a, b) => b[1] - a[1]).map(([label, value]) => ({ label, value }))} />}</div>
           <div className="card"><h3>Mobile-money share by week</h3><p className="muted small">Percent of that week’s orders (last 12 weeks).</p>
-            {d.weekly.length === 0 ? <EmptyState emoji="📅" title="No weekly data yet" /> :
+            {d.weekly.length === 0 ? <EmptyState icon="calendar" title="No weekly data yet" /> :
               <BarChart label="Mobile money share by week" max={100} unit="%" data={d.weekly.map((w) => ({ label: w.week, value: w.total ? Math.round((w.mobile_money / w.total) * 1000) / 10 : 0 }))} />}</div>
         </div>
         <div className="grid g2" style={{ marginTop: 20 }}>
           <div className="card"><h3>By seller district</h3><p className="muted small">Districts with at least 5 orders.</p>
-            {d.by_district.length === 0 ? <EmptyState emoji="🗺️" title="Not enough orders per district yet" /> :
+            {d.by_district.length === 0 ? <EmptyState icon="map" title="Not enough orders per district yet" /> :
               <BarChart label="Mobile money share by district" max={100} unit="%" data={d.by_district.map((r) => ({ label: `${r.name} (${r.total})`, value: pct(r) }))} />}</div>
           <div className="card"><h3>By product category</h3><p className="muted small">Categories with at least 5 orders.</p>
-            {d.by_category.length === 0 ? <EmptyState emoji="🏷️" title="Not enough orders per category yet" /> :
+            {d.by_category.length === 0 ? <EmptyState icon="tag" title="Not enough orders per category yet" /> :
               <BarChart label="Mobile money share by category" max={100} unit="%" data={d.by_category.map((r) => ({ label: `${r.name} (${r.total})`, value: pct(r) }))} />}</div>
         </div>
       </>)}
