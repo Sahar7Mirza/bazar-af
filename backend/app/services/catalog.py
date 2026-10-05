@@ -147,6 +147,10 @@ def create_product(db: Session, user: User, data: ProductIn) -> Product:
     db.add(p)
     db.flush()
     audit.record(db, "product.create", actor_id=user.id, entity_type="product", entity_id=p.id)
+    if p.status == ProductStatus.active:
+        from app.services import recommendations  # local import: recommendations imports this module
+
+        recommendations.notify_new_product(db, p, sp.business_name)
     db.commit()
     return p
 
@@ -158,8 +162,13 @@ def update_product(db: Session, user: User, pid: int, data: ProductPatch) -> Pro
         _check_category(db, changes["category_id"])
     if changes.get("status") == "active" and p.hidden_by_admin:
         raise Forbidden("This product was hidden by an administrator", code="hidden_by_admin")
+    was_active = p.status == ProductStatus.active
     for k, v in changes.items():
         setattr(p, k, ProductStatus(v) if k == "status" else v)
+    if not was_active and p.status == ProductStatus.active:  # newly published: tell interested buyers
+        from app.services import recommendations
+
+        recommendations.notify_new_product(db, p, db.get(SellerProfile, p.seller_id).business_name)
     audit.record(db, "product.update", actor_id=user.id, entity_type="product", entity_id=p.id, detail={"fields": sorted(changes)})
     db.commit()
     return p

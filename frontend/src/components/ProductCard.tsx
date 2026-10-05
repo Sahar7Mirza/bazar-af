@@ -1,11 +1,13 @@
 import Link from "next/link";
+import { Icon } from "@/components/Icon";
 import { afn } from "@/lib/format";
 import type { Product } from "@/lib/types";
 
-export function ProductCard({ p, emoji }: { p: Product; emoji: string }) {
+export function ProductCard({ p, icon, why }: { p: Product; icon: string; why?: string }) {
   return (
     <Link href={`/products/${p.id}`} className="card hover prod">
-      <div className="thumb" aria-hidden="true">{emoji}</div>
+      <div className="thumb" aria-hidden="true"><Icon name={icon} size={40} /></div>
+      {why && <span className="why"><Icon name="sparkles" size={13} /> {why}</span>}
       <strong>{p.name}</strong>
       <span className="muted small">{p.seller_name}{p.district ? ` · ${p.district}` : ""}</span>
       <span className="price">{afn(p.price_afn)} <span className="muted small">/ {p.unit}</span></span>

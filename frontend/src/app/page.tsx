@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ProductCard } from "@/components/ProductCard";
-import { emojiFor } from "@/lib/emoji";
+import { Icon, categoryIcon } from "@/components/Icon";
+import { Recommended } from "@/components/Recommended";
 import { publicGet } from "@/lib/server";
 import type { Category, Page, Product } from "@/lib/types";
 
@@ -24,16 +25,18 @@ export default async function Home() {
         <div className="grid g4" style={{ marginTop: 28 }}>
           {(cats ?? []).map((c) => (
             <Link key={c.id} href={`/products?category_id=${c.id}`} className="card hover center" style={{ color: "inherit" }}>
-              <div style={{ fontSize: "2.2rem" }} aria-hidden="true">{emojiFor(c.name)}</div><strong>{c.name}</strong>
+              <div className="cat-icon"><Icon name={categoryIcon(c.name)} size={30} /></div><strong>{c.name}</strong>
             </Link>
           ))}
         </div>
       </div></section>
 
-      <section className="section"><div className="wrap">
+      <Recommended />
+
+      <section className="section alt"><div className="wrap">
         <div className="row between"><h2>Fresh on the market</h2><Link href="/products">See all →</Link></div>
         {products && products.items.length > 0 ? (
-          <div className="grid g3" style={{ marginTop: 20 }}>{products.items.map((p) => <ProductCard key={p.id} p={p} emoji={emojiFor(catName.get(p.category_id ?? -1))} />)}</div>
+          <div className="grid g3" style={{ marginTop: 20 }}>{products.items.map((p) => <ProductCard key={p.id} p={p} icon={categoryIcon(catName.get(p.category_id ?? -1))} />)}</div>
         ) : (
           <div className="state"><h3>The market is warming up</h3><p>No products to show yet. Check back soon.</p></div>
         )}

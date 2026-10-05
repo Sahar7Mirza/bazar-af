@@ -6,7 +6,7 @@ import { afn } from "@/lib/format";
 
 export default function Cart() {
   const lines = useCart();
-  if (!lines.length) return <div className="wrap page"><EmptyState emoji="🛒" title="Your cart is empty" text="Find something you like from a local seller." action={<Link className="btn" href="/products">Browse products</Link>} /></div>;
+  if (!lines.length) return <div className="wrap page"><EmptyState icon="cart" title="Your cart is empty" text="Find something you like from a local seller." action={<Link className="btn" href="/products">Browse products</Link>} /></div>;
   return (
     <div className="wrap page">
       <h1 style={{ fontSize: "2.4rem" }}>Your cart</h1>

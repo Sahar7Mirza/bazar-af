@@ -25,7 +25,7 @@ function Sellers() {
         <select id="st" style={{ width: "auto" }} value={status} onChange={(e) => { setPage(1); router.push(e.target.value ? `/admin/sellers?status=${e.target.value}` : "/admin/sellers"); }}>
           <option value="">All</option>{["pending", "approved", "rejected", "suspended"].map((s) => <option key={s}>{s}</option>)}</select></div>
       {err && <Alert kind="bad">{err}</Alert>}
-      {res.loading ? <LoadingRows /> : res.error ? <ErrorState error={res.error} retry={res.reload} /> : !res.data?.items.length ? <EmptyState emoji="🏪" title="No sellers here" /> : (<>
+      {res.loading ? <LoadingRows /> : res.error ? <ErrorState error={res.error} retry={res.reload} /> : !res.data?.items.length ? <EmptyState icon="store" title="No sellers here" /> : (<>
         <div className="table-wrap"><table>
           <thead><tr><th>Business</th><th>District</th><th>Registered</th><th>Status</th><th><span className="sr">Actions</span></th></tr></thead>
           <tbody>{res.data.items.map((s) => (

@@ -32,6 +32,10 @@ Captured from the running app with the seeded demo data (all data is synthetic).
 | Administrator: platform totals and payment-preference split | Administrator: seller approval queue |
 | ![Audit log](docs/img/12-admin-audit.png) | |
 | Audit log of logins and admin actions | |
+| ![Recommended](docs/img/16-recommended.png) | ![Interests](docs/img/17-interests.png) |
+| Buyer home: recommendations based on interests and past orders | Buyers choose the categories they care about |
+| ![Notifications](docs/img/18-notifications.png) | |
+| Alerts for order updates and new products in followed categories | |
 | ![Mobile](docs/img/14-mobile-home.png) | ![Dark mode](docs/img/15-dark-products.png) |
 | Responsive layout on a phone | Dark mode follows the system setting |
 
@@ -52,7 +56,7 @@ Swagger UI is at http://localhost:8000/docs when `ENVIRONMENT=development`.
 More: [local install without Docker](docs/13-deployment.md) · [testing](docs/12-testing.md) · [deployment checklist](docs/13-deployment.md)
 
 ## What you can do
-- **Anyone:** browse, search, filter (category, district, price) and sort products.
+- **Anyone:** browse, search, filter (category, district, price) and sort products; see popular products.
 - **Buyer:** register, cart (one seller per order), checkout with a Cash / Mobile Money preference, track and cancel pending orders.
 - **Seller:** shop profile, product CRUD (soft delete, stock), incoming orders through `pending -> confirmed -> ready -> completed` or cancel (stock restored), dashboard.
 - **Administrator:** approve / reject / suspend sellers, deactivate users, moderate products, manage categories, read every order, view the audit log, research dashboard and marketplace analytics.

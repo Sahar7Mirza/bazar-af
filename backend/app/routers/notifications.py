@@ -17,6 +17,7 @@ class NotificationOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
     order_id: int | None
+    product_id: int | None
     kind: str
     title: str
     message: str

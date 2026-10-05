@@ -33,7 +33,7 @@ export default function Checkout() {
     <Guard roles={["buyer"]} user={user} loading={loading}>
       <div className="mid page">
         <h1 style={{ fontSize: "2.4rem" }}>Checkout</h1>
-        {!lines.length ? <EmptyState emoji="🛒" title="Nothing to check out" action={<Link className="btn" href="/products">Browse products</Link>} /> : (<>
+        {!lines.length ? <EmptyState icon="cart" title="Nothing to check out" action={<Link className="btn" href="/products">Browse products</Link>} /> : (<>
           {err && <Alert kind="bad">{err}</Alert>}
           <div className="card stack">
             <h3>Order summary · {lines[0].sellerName}</h3>

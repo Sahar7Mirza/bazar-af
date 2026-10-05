@@ -22,7 +22,7 @@ export default function SellerProducts() {
       </div>
       {err && <Alert kind="bad">{err}</Alert>}
       {res.loading ? <LoadingRows /> : res.error ? <ErrorState error={res.error} retry={res.reload} /> : !res.data?.items.length ? (
-        <EmptyState emoji="🧺" title="No products yet" text="Add your first product to start selling." action={<Link className="btn" href="/seller/products/new">Add product</Link>} />
+        <EmptyState icon="package" title="No products yet" text="Add your first product to start selling." action={<Link className="btn" href="/seller/products/new">Add product</Link>} />
       ) : (<>
         <div className="table-wrap"><table>
           <thead><tr><th>Name</th><th className="num">Price</th><th className="num">Stock</th><th>Status</th><th><span className="sr">Actions</span></th></tr></thead>

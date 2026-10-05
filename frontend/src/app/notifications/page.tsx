@@ -2,10 +2,13 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useSession } from "@/components/Session";
+import { Icon } from "@/components/Icon";
 import { EmptyState, ErrorState, Guard, LoadingRows, Pager, useLoad } from "@/components/ui";
 import { api } from "@/lib/api";
 import { dateTime } from "@/lib/format";
 import type { AppNotification, Page } from "@/lib/types";
+
+const KIND_ICON: Record<string, string> = { order_confirmed: "check", order_ready: "package-check", order_cancelled: "package-x", new_product: "sparkles" };
 
 export default function Notifications() {
   const { user, loading } = useSession();
@@ -21,13 +24,13 @@ export default function Notifications() {
       <div className="mid page">
         <div className="row between"><h1 style={{ fontSize: "2.2rem" }}>Notifications</h1>{anyUnread && <button className="btn quiet sm" onClick={readAll}>Mark all as read</button>}</div>
         {res.loading ? <LoadingRows /> : res.error ? <ErrorState error={res.error} retry={res.reload} /> : !res.data?.items.length ? (
-          <EmptyState emoji="🔔" title="No notifications yet" text="You will be told here when a seller confirms your order, when it is ready for pick up, or if it is cancelled." />
+          <EmptyState icon="bell" title="No notifications yet" text="You will be told here when a seller confirms your order, when it is ready for pick up, if it is cancelled, or when something new appears in a category you follow." />
         ) : (<>
           <div className="stack">{res.data.items.map((n) => (
             <div key={n.id} className={`card notif ${n.read_at ? "" : "unread"}`} onClick={() => open(n)}>
-              <h3>{n.title}</h3>
+              <h3><Icon name={KIND_ICON[n.kind] ?? "bell"} size={16} className="kind" /> {n.title}</h3>
               <p>{n.message}</p>
-              <div className="row between small muted"><span>{dateTime(n.created_at)}</span>{n.order_id && <Link href={`/orders/${n.order_id}`} onClick={() => open(n)}>View order #{n.order_id}</Link>}</div>
+              <div className="row between small muted"><span>{dateTime(n.created_at)}</span>{n.order_id ? <Link href={`/orders/${n.order_id}`} onClick={() => open(n)}>View order #{n.order_id}</Link> : n.product_id ? <Link href={`/products/${n.product_id}`} onClick={() => open(n)}>View product</Link> : null}</div>
             </div>))}
           </div>
           <Pager page={res.data} onPage={setPage} />

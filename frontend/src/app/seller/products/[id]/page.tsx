@@ -12,7 +12,7 @@ export default function EditProduct() {
   const p = res.data?.items.find((x) => String(x.id) === id);
   return (
     <SellerShell title="Edit product">
-      {res.loading ? <LoadingRows n={4} /> : res.error ? <ErrorState error={res.error} retry={res.reload} /> : !p ? <EmptyState emoji="🔎" title="Product not found" /> : <ProductForm product={p} />}
+      {res.loading ? <LoadingRows n={4} /> : res.error ? <ErrorState error={res.error} retry={res.reload} /> : !p ? <EmptyState icon="search" title="Product not found" /> : <ProductForm product={p} />}
     </SellerShell>
   );
 }
