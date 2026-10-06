@@ -95,6 +95,7 @@ class PublicProductOut(ProductOut):
 
 class RecommendedProductOut(PublicProductOut):
     reason: str | None = None  # why this product is shown, e.g. "Matches your interest in Food & Bakery"
+    match: int = 0  # 0-100 strength of the match, shown as a small meter
 
 
 class InterestsIn(BaseModel):

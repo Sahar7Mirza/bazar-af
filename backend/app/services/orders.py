@@ -1,7 +1,7 @@
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 
-from sqlalchemy import Select, select
+from sqlalchemy import Select, func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.errors import AppError, Conflict, Forbidden, NotFound
@@ -93,6 +93,13 @@ def list_stmt(db: Session, user: User, status: str | None = None) -> Select:
     if status:
         stmt = stmt.where(Order.status == OrderStatus(status))
     return stmt.order_by(Order.id.desc())
+
+
+def status_counts(db: Session, stmt: Select) -> dict[str, int]:
+    """Orders per status for an (unfiltered-by-status) listing, so the UI can show chips like "Pending 3"."""
+    sub = stmt.order_by(None).subquery()
+    got = {str(getattr(st, "value", st)): n for st, n in db.execute(select(sub.c.status, func.count()).group_by(sub.c.status)).all()}
+    return {s: got.get(s, 0) for s in ("pending", "confirmed", "ready", "completed", "cancelled")}
 
 
 def get_order(db: Session, user: User, oid: int, lock: bool = False) -> Order:

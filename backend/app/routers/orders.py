@@ -27,7 +27,7 @@ def list_mine(
     db: Session = Depends(get_db),
 ):
     rows, total = paginate(db, svc.list_stmt(db, user, status), params)
-    return envelope([OrderOut.model_validate(r) for r in rows], total, params)
+    return {**envelope([OrderOut.model_validate(r) for r in rows], total, params), "counts": svc.status_counts(db, svc.list_stmt(db, user))}
 
 
 @router.get("/{order_id}", response_model=OrderOut)

@@ -1,12 +1,12 @@
 import {
   Apple, Ban, Bell, BellRing, BrickWall, Calendar, Carrot, CheckCircle2, CookingPot, FolderOpen, Gem, Heart, Lock, Map, Nut, Package, PackageCheck, PackageX,
-  Palette, Search, ShoppingBag, ShoppingCart, Shirt, Smartphone, Sparkles, Store, Tag, TriangleAlert, Users, Wheat, ScrollText, type LucideIcon,
+  Palette, Search, ShoppingBag, ShoppingCart, Shirt, Smartphone, Sparkles, Store, Tag, TriangleAlert, Users, Wheat, ScrollText, TrendingDown, TrendingUp, Minus, Trophy, Wallet, type LucideIcon,
 } from "lucide-react";
 
 const ICONS: Record<string, LucideIcon> = {
   bell: Bell, "bell-ring": BellRing, cart: ShoppingCart, bag: ShoppingBag, search: Search, package: Package, "package-check": PackageCheck, "package-x": PackageX,
   store: Store, users: Users, audit: ScrollText, calendar: Calendar, map: Map, tag: Tag, phone: Smartphone, alert: TriangleAlert, lock: Lock, ban: Ban,
-  folder: FolderOpen, heart: Heart, sparkles: Sparkles, check: CheckCircle2,
+  "trend-up": TrendingUp, "trend-down": TrendingDown, flat: Minus, trophy: Trophy, wallet: Wallet, folder: FolderOpen, heart: Heart, sparkles: Sparkles, check: CheckCircle2,
   bakery: Wheat, produce: Carrot, nuts: Nut, textiles: Shirt, electronics: Smartphone, home: CookingPot, construction: BrickWall, handicrafts: Palette, fruit: Apple, gem: Gem,
 };
 

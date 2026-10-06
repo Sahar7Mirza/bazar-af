@@ -26,8 +26,8 @@ def recommendations(limit: int = Query(8, ge=1, le=24), user: User | None = Depe
     """Personalised for signed-in buyers (interests + past orders); popular products for everyone else."""
     who = user if user is not None and user.role == Role.buyer else None
     return [
-        RecommendedProductOut.model_validate(p).model_copy(update={"seller_name": shop, "district": district, "reason": reason})
-        for p, shop, district, reason in svc.recommend(db, who, limit)
+        RecommendedProductOut.model_validate(p).model_copy(update={"seller_name": shop, "district": district, "reason": reason, "match": match})
+        for p, shop, district, reason, match in svc.recommend(db, who, limit)
     ]
 
 
