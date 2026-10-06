@@ -35,7 +35,7 @@ Two Vercel projects are created from this one repository, plus a Neon database.
 
 | Part | Vercel project root | Environment variables |
 |---|---|---|
-| API (FastAPI, Python runtime) | `backend` | `ENVIRONMENT=production`, `DATABASE_URL` (Neon, `postgresql+psycopg://...?sslmode=require`), `JWT_SECRET` (32+ chars), `CORS_ORIGINS` (the frontend URL) |
+| API (FastAPI, Python runtime) | `backend` | `ENVIRONMENT=production`, `DATABASE_URL` (Neon, `postgresql+psycopg://...?sslmode=require`), `JWT_SECRET` (32+ chars), `CORS_ORIGINS` (the frontend URL), `APP_URL` (the frontend URL, for links in emails), `RESEND_API_KEY`, `EMAIL_FROM` |
 | Web (Next.js) | `frontend` | `API_URL=https://<api-project>.vercel.app/api/v1` |
 
 - The API entrypoint is `backend/index.py`. `backend/scripts/vercel_build.py` applies Alembic migrations at build time (skipped when `DATABASE_URL` is not set).
@@ -43,3 +43,11 @@ Two Vercel projects are created from this one repository, plus a Neon database.
 - Demo data: `python -m app.seed --reset` refuses `ENVIRONMENT=production`. Run it once from a developer machine with `ENVIRONMENT=development`, `SEED_PASSWORD` and `DATABASE_URL` pointing at the Neon database.
 - Limits to know: the Python bundle limit is 500 MB (the API is now small: the heavy statistics libraries were removed with the survey); account lockout is stored in the database, so it works across serverless instances.
 - Vercel Deployment Protection must not block the API's production URL, or the web project's server-side calls will receive 401.
+
+
+## Email (Resend)
+Password-reset and email-confirmation links are sent through [Resend](https://resend.com). Add `RESEND_API_KEY` (secret), `EMAIL_FROM` and `APP_URL` to the API project's environment variables and redeploy. Without a key the app still works; emails are simply not sent.
+
+- **Testing:** with the default sender `onboarding@resend.dev`, Resend only delivers to the email address of the Resend account owner. Use that address for a test account.
+- **Real users:** verify a domain you own in Resend, then set `EMAIL_FROM` to an address on it (for example `Bazar.af <hello@yourdomain>`).
+- Reset links work once and expire after 60 minutes; confirmation links expire after 48 hours. Resetting a password signs the account out everywhere.

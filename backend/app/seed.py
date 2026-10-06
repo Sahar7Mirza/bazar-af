@@ -8,7 +8,7 @@ import sys
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 
-from sqlalchemy import select, text
+from sqlalchemy import select, text, update
 
 from app.core.config import get_settings
 from app.core.security import hash_password
@@ -161,7 +161,7 @@ def seed(db, rng: random.Random, pw: str, n_buyers=30, n_orders=150):
         o.total_afn = total
         db.add(o)
     db.flush()
-
+    db.execute(update(User).values(email_verified_at=now))  # demo accounts count as verified
     db.commit()
     return {"sellers": len(sellers), "buyers": n_buyers, "products": len(live), "orders": n_orders}
 

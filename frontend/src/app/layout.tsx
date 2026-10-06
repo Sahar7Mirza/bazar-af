@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Footer, Nav } from "@/components/Nav";
-import { LiveProvider, PendingBanner } from "@/components/Live";
+import { LiveProvider, PendingBanner, VerifyBanner } from "@/components/Live";
 import { SessionProvider } from "@/components/Session";
 
 export const metadata: Metadata = {
@@ -18,6 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SessionProvider>
           <LiveProvider>
             <Nav />
+            <VerifyBanner />
             <PendingBanner />
             <main id="main">{children}</main>
             <Footer />

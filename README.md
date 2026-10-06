@@ -103,6 +103,6 @@ Feature branches (`feature/...`) merged with `--no-ff` into `main`; tests run be
 
 ## Known limitations
 - Dari (RTL) interface is planned.
-- No email/SMS verification, password reset or image uploads yet.
+- No SMS verification or image uploads yet. Emails (password reset, email confirmation) need a Resend key; without it they are skipped.
 - Demo orders are **synthetic**.
 - Docker images are not yet built/verified (see [deployment notes](docs/13-deployment.md#verification-status)).

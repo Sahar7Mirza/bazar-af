@@ -20,6 +20,12 @@ class Settings(BaseSettings):
     bcrypt_rounds: int = Field(default=12, ge=4, le=15)  # tests lower it for speed; production keeps 12
     lockout_threshold: int = 5
     lockout_minutes: int = 15
+    # Email (Resend). Without a key nothing is sent; in development the link is written to the log instead.
+    resend_api_key: str = Field(default="", repr=False)
+    email_from: str = "Bazar.af <onboarding@resend.dev>"
+    app_url: str = "http://localhost:3000"  # public web address, used to build links in emails
+    reset_token_minutes: int = 60
+    verify_token_hours: int = 48
 
     @model_validator(mode="after")
     def _require_secret(self) -> "Settings":

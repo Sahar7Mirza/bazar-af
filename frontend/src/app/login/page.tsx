@@ -8,7 +8,8 @@ import type { User } from "@/lib/types";
 
 function Form() {
   const router = useRouter();
-  const next = useSearchParams().get("next");
+  const params = useSearchParams();
+  const next = params.get("next");
   const { setUser } = useSession();
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -27,9 +28,11 @@ function Form() {
   }
   return (
     <form onSubmit={submit} noValidate>
+      {params.get("registered") && <Alert kind="ok">Account created. We emailed you a link to confirm your address. You can sign in now.</Alert>}
       {err && <Alert kind="bad">{err}</Alert>}
       <Field id="email" label="Email"><input id="email" name="email" type="email" autoComplete="email" required /></Field>
       <Field id="password" label="Password"><input id="password" name="password" type="password" autoComplete="current-password" required /></Field>
+      <p className="small" style={{ textAlign: "right", marginTop: -8 }}><Link href="/forgot-password">Forgot password?</Link></p>
       <button className="btn lg" style={{ width: "100%" }} disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
       <p className="center muted small" style={{ marginTop: 18 }}>New here? <Link href="/register">Create an account</Link></p>
     </form>

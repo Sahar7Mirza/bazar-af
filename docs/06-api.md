@@ -17,6 +17,9 @@ Base path `/api/v1`. JSON only. Auth: `Authorization: Bearer <access JWT>` (the 
 | | POST `/auth/refresh` (rotates refresh token) | public (refresh token) |
 | | POST `/auth/logout` | any |
 | | GET `/auth/me` | any |
+| | POST `/auth/forgot-password` (always answers 202, never reveals whether the email exists) | public |
+| | POST `/auth/reset-password` (one-time token, signs out everywhere) | public (token) |
+| | POST `/auth/verify-email`, POST `/auth/resend-verification` | public (token) / any |
 | Categories | GET `/categories` | public |
 | | POST/PATCH `/categories` | admin |
 | Seller profile | GET/PUT `/sellers/me` | seller |

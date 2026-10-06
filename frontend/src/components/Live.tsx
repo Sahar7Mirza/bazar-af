@@ -99,3 +99,20 @@ export function PendingBanner() {
     </div>
   );
 }
+
+/** Gentle reminder for accounts whose email is not confirmed yet. Nothing is blocked. */
+export function VerifyBanner() {
+  const { user } = useSession();
+  const [state, setState] = useState<"idle" | "sent" | "fail">("idle");
+  if (!user || user.email_verified_at) return null;
+  async function resend() {
+    try { await api("auth/resend-verification", { method: "POST" }); setState("sent"); } catch { setState("fail"); }
+  }
+  return (
+    <div className="notice" role="status">
+      <Icon name="alert" size={16} />
+      <span>{state === "sent" ? "Check your inbox for the confirmation link." : state === "fail" ? "Could not send the email. Try again later." : "Please confirm your email address. We sent you a link when you joined."}</span>
+      {state !== "sent" && <button className="btn quiet sm" onClick={resend}>Resend email</button>}
+    </div>
+  );
+}
