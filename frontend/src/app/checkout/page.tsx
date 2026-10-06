@@ -30,7 +30,7 @@ export default function Checkout() {
     } catch (x) { setErrs(fieldErrors(x)); setErr(x instanceof ApiError ? x.message : "Could not place the order"); } finally { setBusy(false); }
   }
   return (
-    <Guard roles={["buyer"]} user={user} loading={loading}>
+    <Guard roles={["buyer"]} user={user} loading={loading} denied="Checkout is for buyer accounts. Sellers and admins cannot place orders. To test an order, sign out and sign in with a buyer account.">
       <div className="mid page">
         <h1 style={{ fontSize: "2.4rem" }}>Checkout</h1>
         {!lines.length ? <EmptyState icon="cart" title="Nothing to check out" action={<Link className="btn" href="/products">Browse products</Link>} /> : (<>
