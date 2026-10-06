@@ -1,52 +1,39 @@
-# 10 · Research module (mobile-money adoption analytics)
+# 10 · Research module (mobile-money adoption from checkout choices)
 
-Objectives O1 and O3 of the project: collect ≥150 valid questionnaire responses, analyse what drives willingness to adopt mobile money, and present it in a dashboard. The marketplace's own order data (simulated cash / mobile-money preference) complements the survey.
+Objective: measure how many Bazar.af customers choose Mobile Money instead of Cash, and where. The questionnaire/survey was removed; the data is now the choice every buyer makes at checkout. No money moves, so these are **stated preferences**.
 
-## Instrument (TAM / UTAUT inspired)
-5-point Likert items (1 = strongly disagree … 5 = strongly agree), 3–4 items per construct, plus demographics.
+## What is measured
+Each non-cancelled order carries `payment_preference` (cash | mobile_money) and, for mobile money, a provider. From that:
 
-| Code | Construct | Example item |
+| Measure | How |
+|---|---|
+| Share of orders using mobile money | mobile-money orders ÷ all orders, with a **95 % Wilson confidence interval** |
+| Share of buyers using it | buyers with ≥ 1 mobile-money order ÷ buyers with orders |
+| Provider mix | orders per provider |
+| Trend | share per week, last 12 weeks; week-on-week change only when both weeks have ≥ 5 orders |
+| Segments | share by seller district and by product category (a group counts only with enough orders) |
+| Basket size | average order value for cash vs mobile money |
+| Are segments different? | chi-square test of independence (cash/mobile × district, × category) with p-value and Cramér's V as effect size; shown only with ≥ 20 orders and ≥ 2 groups |
+
+## Who sees what
+| Page | Who | Content |
 |---|---|---|
-| PU | Perceived usefulness | "Mobile money would make my business transactions faster." |
-| PEOU | Ease of use | "I find it easy to learn to use mobile money." |
-| TR | Trust | "I trust mobile money providers to keep my money safe." |
-| CO | Cost | "Mobile money fees are affordable for my business." |
-| AC | Accessibility | "Agents and network coverage are available near me." |
-| WA | Willingness to adopt (dependent variable) | "I intend to use mobile money for business within 6 months." |
+| `/research` | everyone, no login | the figures above; groups with fewer than 5 orders hidden; no names, IDs or phone numbers |
+| `/admin/research` | admin | the same, every group visible, plus **Download anonymised orders (CSV)** |
 
-Demographics (optional, coarse to protect anonymity): role (seller/buyer/other), age band, gender, district, business type, current use of mobile money.
-
-## Data model additions
-`survey_questions(id, construct, code, text_en, text_fa, position, is_reverse_scored, is_active)` ·
-`survey_responses(id, submitted_at, consent, respondent_type, age_band, gender, district, business_type, uses_mobile_money, completion_seconds, is_valid, invalid_reason, created_at, updated_at)` ·
-`survey_answers(id, response_id FK, question_id FK, value SMALLINT CHECK 1..5, UNIQUE(response_id, question_id))`.
-No user_id, IP or phone on responses. A response is **valid** when consent is true, all items are answered, completion time ≥ 30 s and it is not straight-lining (all identical answers).
-
-## Analysis (server side, pandas / SciPy / statsmodels)
-1. **Descriptive**: n, mean, SD, median per item and construct (construct score = mean of its items, reverse items recoded); frequency tables for demographics.
-2. **Reliability**: Cronbach's alpha per construct (acceptable ≥ 0.70).
-3. **Association**: Pearson and Spearman correlation matrix of construct scores with p-values; Kruskal–Wallis / chi-square for WA across groups (e.g. current users vs non-users).
-4. **Regression**: OLS `WA ~ PU + PEOU + TR + CO + AC`; report standardised β, p, 95 % CI, R², adjusted R², F-test, VIF for multicollinearity. Results are interpreted in plain language on the dashboard ("Trust is the strongest predictor, β = …").
-5. Suppress any breakdown cell with n < 5.
+Why public: it shows sellers and researchers evidence of real adoption and invites others to take part. The page contains only aggregates, so it is safe to open. The page states plainly that the sample is Bazar.af users and that demo data is synthetic.
 
 ## API
-| Method & path | Role |
+| Endpoint | Access |
 |---|---|
-| GET `/survey` | public (active questionnaire) |
-| POST `/survey/responses` | public, rate-limited, validated |
-| GET `/admin/research/summary` (counts, valid/target, quality flags) | admin |
-| GET `/admin/research/descriptives` | admin |
-| GET `/admin/research/reliability` | admin |
-| GET `/admin/research/correlations` | admin |
-| GET `/admin/research/regression` | admin |
+| GET `/research/summary` | public (cached 30 s) |
+| GET `/admin/research/summary` | admin |
 | GET `/admin/research/export.csv` | admin |
-| GET `/admin/analytics/marketplace` | admin |
 
-## Dashboard (admin)
-Progress ring (valid / 150); bar chart of construct means; correlation heat-map; regression table + coefficient chart; preference split (Cash vs Mobile Money, provider share) from orders; filters by district and respondent type; empty state until n ≥ 30 ("Not enough responses for regression yet").
+CSV columns: `order_id, week, district, category, payment_preference, mobile_money_provider, total_afn, status, lines`. No buyer, seller or name fields.
 
-## Usability evaluation (O3)
-≥10 participants (mix of sellers and buyers) perform 6 core tasks: register, create a product, find and filter a product, place an order with a payment preference, seller confirms the order, admin reads the dashboard. Record completion, time and errors; SUS questionnaire. Target: ≥75 % task completion and SUS ≥ 68. Script and results template kept in `docs/usability/` (added in Phase 5).
+## Using it in the paper
+Report the share with its confidence interval and n, quote the chi-square result for any segment claim, and state the limits: preferences not payments, self-selected users, early/demo data. Export the CSV for further analysis in Excel, SPSS or R.
 
-## Seed data
-~160 synthetic responses generated with a fixed random seed and a plausible underlying model (Trust and Usefulness positively related to Willingness, Cost negatively weighted) so the dashboard is meaningful. **Clearly labelled synthetic**; real data replaces it by clearing `survey_*` tables.
+## Testing
+Unit tests check the Wilson interval and the chi-square p-value against reference values; API tests check public access, small-group hiding, admin-only routes and that the CSV carries no personal data.

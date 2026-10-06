@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Footer, Nav } from "@/components/Nav";
+import { LiveProvider, PendingBanner } from "@/components/Live";
 import { SessionProvider } from "@/components/Session";
 
 export const metadata: Metadata = {
@@ -15,9 +16,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <a className="skip" href="#main">Skip to content</a>
         <SessionProvider>
-          <Nav />
-          <main id="main">{children}</main>
-          <Footer />
+          <LiveProvider>
+            <Nav />
+            <PendingBanner />
+            <main id="main">{children}</main>
+            <Footer />
+          </LiveProvider>
         </SessionProvider>
       </body>
     </html>

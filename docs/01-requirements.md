@@ -25,7 +25,7 @@ Micro and small enterprises (MSEs) in Kabul — bakeries, tailors, grocers, phon
 
 **Administrator** — FR15 approve / reject / suspend sellers; FR16 list and deactivate users; FR17 manage categories; FR18 moderate products (hide); FR19 view all orders (read only); FR20 view the audit log; FR21 see platform statistics.
 
-**Research module (Administrator/Researcher)** — FR22 publish a TAM/UTAUT-based questionnaire (constructs: Usefulness, Ease of use, Trust, Cost, Accessibility, Willingness to adopt mobile money); FR23 anyone can submit **one anonymous response** per device/session through a public survey page (consent checkbox, no personal identifiers); FR24 admin sees response counts against the target of 150 and data-quality flags; FR25 admin dashboard with descriptive statistics, reliability (Cronbach's alpha), correlations and multiple regression of Willingness on the five predictors; FR26 export anonymised responses as CSV; FR27 marketplace analytics (orders by preference, provider share, by district/category).
+**Research module (public + Administrator)** — FR22 anyone can open a Research page with anonymous adoption figures computed from the Cash / Mobile Money choice at checkout (share of orders and buyers, provider, week, district, category, 95% confidence intervals, chi-square tests); FR23 groups with fewer than 5 orders are hidden publicly; FR24 admin sees every group; FR25 admin downloads an anonymised one-row-per-order CSV for the paper; FR26 sellers get live new-order alerts that stay until they act.
 
 ## 1.4 Non-functional requirements
 - **Security**: bcrypt password hashing (cost 12), password policy, account lockout (5 failures → 15 min), login rate limit, JWT with `exp`, refresh-token rotation and revocation, object-level authorisation (a seller cannot touch another seller's products or orders), CORS allow-list, security headers, no secrets in Git, generic login errors (no user enumeration).
@@ -33,7 +33,7 @@ Micro and small enterprises (MSEs) in Kabul — bakeries, tailors, grocers, phon
 - **Observability**: JSON logs, `X-Request-ID`, access log, error log; audit log for security- and business-relevant events.
 - **Maintainability**: layered modules (router → service → repository/models), one error type, typed schemas, migrations only (no `create_all` outside tests).
 - **Performance targets (demo scale)**: list endpoints paginated (default 20, max 100) with indexes on all filter/sort columns; p95 < 300 ms on the seed data set.
-- **Research ethics**: survey is voluntary and anonymous, consent recorded, no IP/phone stored with answers, results only shown in aggregate (minimum group size 5 when broken down).
+- **Research ethics**: only stated Cash/Mobile Money preferences are analysed, no personal identifiers are shown or exported, results are aggregate-only (minimum group size 5 on the public page).
 - **Usability**: responsive, loading / error / empty states on every data view, WCAG 2.1 AA targets (contrast, labels, focus, keyboard), usability test with >= 10 users (see docs/10-research-module.md);, keyboard accessible, English UI with Dari (RTL) planned as a later phase (see roadmap).
 
 ## 1.5 Out of scope

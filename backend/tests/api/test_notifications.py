@@ -16,7 +16,7 @@ def placed(client, db):
 
 def test_confirm_notifies_buyer_with_pickup_estimate(client, db):
     oid, bh, sh = placed(client, db)
-    assert client.get("/api/v1/notifications/unread-count", headers=bh).json() == {"unread": 0}
+    assert client.get("/api/v1/notifications/unread-count", headers=bh).json()["unread"] == 0
     r = client.post(f"/api/v1/orders/{oid}/status", json={"status": "confirmed", "pickup_in_minutes": 90}, headers=sh)
     assert r.status_code == 200
     est = datetime.fromisoformat(r.json()["estimated_pickup_at"])
@@ -24,7 +24,7 @@ def test_confirm_notifies_buyer_with_pickup_estimate(client, db):
     items = client.get("/api/v1/notifications", headers=bh).json()["items"]
     assert len(items) == 1 and items[0]["kind"] == "order_confirmed"
     assert f"#{oid}" in items[0]["message"] and "1 hour 30 minutes" in items[0]["message"] and "Qargha Bakery" in items[0]["message"]
-    assert client.get("/api/v1/notifications/unread-count", headers=bh).json() == {"unread": 1}
+    assert client.get("/api/v1/notifications/unread-count", headers=bh).json()["unread"] == 1
 
 
 def test_confirm_defaults_to_sixty_minutes(client, db):
@@ -54,7 +54,7 @@ def test_seller_cancel_notifies_buyer_but_buyer_cancel_does_not(client, db):
 def test_buyer_cancelling_own_order_creates_no_notification(client, db):
     oid, bh, _ = placed(client, db)
     client.post(f"/api/v1/orders/{oid}/cancel", json={}, headers=bh)
-    assert client.get("/api/v1/notifications/unread-count", headers=bh).json() == {"unread": 0}
+    assert client.get("/api/v1/notifications/unread-count", headers=bh).json()["unread"] == 0
 
 
 def test_invalid_pickup_minutes_rejected(client, db):
@@ -70,10 +70,10 @@ def test_mark_read_and_read_all(client, db):
     nid = client.get("/api/v1/notifications", headers=bh).json()["items"][0]["id"]
     r = client.post(f"/api/v1/notifications/{nid}/read", headers=bh)
     assert r.status_code == 200 and r.json()["read_at"]
-    assert client.get("/api/v1/notifications/unread-count", headers=bh).json() == {"unread": 1}
+    assert client.get("/api/v1/notifications/unread-count", headers=bh).json()["unread"] == 1
     assert len(client.get("/api/v1/notifications?unread=true", headers=bh).json()["items"]) == 1
     assert client.post("/api/v1/notifications/read-all", headers=bh).json() == {"marked": 1}
-    assert client.get("/api/v1/notifications/unread-count", headers=bh).json() == {"unread": 0}
+    assert client.get("/api/v1/notifications/unread-count", headers=bh).json()["unread"] == 0
 
 
 def test_notifications_are_private_and_need_login(client, db):
@@ -81,7 +81,7 @@ def test_notifications_are_private_and_need_login(client, db):
     client.post(f"/api/v1/orders/{oid}/status", json={"status": "confirmed"}, headers=sh)
     other = token(client, "b2@x.af")
     assert client.get("/api/v1/notifications", headers=other).json()["items"] == []
-    nid = db.query(Notification).one().id
+    nid = db.query(Notification).filter(Notification.kind == "order_confirmed").one().id
     assert client.post(f"/api/v1/notifications/{nid}/read", headers=other).status_code == 404
     assert client.get("/api/v1/notifications").status_code == 401
     assert client.get("/api/v1/notifications/unread-count").status_code == 401
@@ -101,7 +101,38 @@ def test_marketplace_analytics_buyers_and_weekly(client, db):
     client.post("/api/v1/orders", json=body("mobile_money", "M-Paisa"), headers=h1)
     client.post("/api/v1/orders", json=body("cash"), headers=h1)
     client.post("/api/v1/orders", json=body("cash"), headers=h2)
-    r = client.get("/api/v1/admin/analytics/marketplace", headers=token(client, "a@x.af")).json()
+    r = client.get("/api/v1/admin/research/summary", headers=token(client, "a@x.af")).json()
     assert r["orders"] == 3 and r["mobile_money_share_pct"] == 33.3
     assert r["buyers"] == {"total": 2, "mobile_money": 1, "share_pct": 50.0}
     assert len(r["weekly"]) == 1 and r["weekly"][0]["total"] == 3 and r["weekly"][0]["mobile_money"] == 1
+
+
+def test_seller_is_alerted_to_a_new_order_until_they_act(client, db):
+    oid, bh, sh = placed(client, db)
+    live = client.get("/api/v1/notifications/unread-count", headers=sh).json()
+    assert live["unread"] == 1 and live["pending_orders"] == 1
+    assert live["latest"]["kind"] == "new_order" and live["latest"]["order_id"] == oid
+    assert "Cash" in live["latest"]["message"] and "25 AFN" in live["latest"]["message"]
+    # reading the bell page alone does not clear the waiting-order count
+    client.post("/api/v1/notifications/read-all", headers=sh)
+    assert client.get("/api/v1/notifications/unread-count", headers=sh).json()["pending_orders"] == 1
+    # the buyer never sees the seller's alert, and gets no pending_orders field
+    assert "pending_orders" not in client.get("/api/v1/notifications/unread-count", headers=bh).json()
+
+
+def test_new_order_alert_clears_when_seller_confirms_or_cancels(client, db):
+    oid, bh, sh = placed(client, db)
+    client.post(f"/api/v1/orders/{oid}/status", json={"status": "confirmed"}, headers=sh)
+    live = client.get("/api/v1/notifications/unread-count", headers=sh).json()
+    assert live["unread"] == 0 and live["pending_orders"] == 0 and live["latest"] is None
+    oid2 = client.post(
+        "/api/v1/orders",
+        json={
+            "items": [{"product_id": db.query(__import__("app.models", fromlist=["Product"]).Product).one().id, "quantity": 1}],
+            "payment_preference": "cash",
+        },
+        headers=bh,
+    ).json()["id"]
+    assert client.get("/api/v1/notifications/unread-count", headers=sh).json()["unread"] == 1
+    client.post(f"/api/v1/orders/{oid2}/cancel", json={"reason": "no stock"}, headers=sh)
+    assert client.get("/api/v1/notifications/unread-count", headers=sh).json()["unread"] == 0

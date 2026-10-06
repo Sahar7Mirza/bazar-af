@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
+import { useLiveRefresh } from "@/components/Live";
 import { EmptyState, ErrorState, LoadingRows, Pager, StatusChip, useLoad } from "@/components/ui";
 import { api } from "@/lib/api";
 import { afn, dateTime, pref } from "@/lib/format";
@@ -12,6 +13,7 @@ export function OrderTable({ endpoint = "orders", showBuyer = false }: { endpoin
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
   const res = useLoad(() => api<Page<Order>>(endpoint, { query: { status, page, page_size: 10 } }), [status, page, endpoint]);
+  useLiveRefresh(res.refresh);  // a new order or status change shows up here by itself
   const counts = res.data?.counts ?? {};
   return (
     <div>

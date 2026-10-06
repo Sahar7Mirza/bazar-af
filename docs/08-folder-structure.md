@@ -18,7 +18,6 @@ bazar-af/
 │   │   ├── db/                # engine, session, base
 │   │   ├── models/            # SQLAlchemy
 │   │   ├── schemas/           # Pydantic
-│   │   ├── analytics/         # descriptives, reliability, correlation, regression
 │   │   ├── services/          # business rules + ownership checks
 │   │   ├── routers/           # auth, categories, sellers, products, orders, admin
 │   │   └── seed.py
@@ -35,7 +34,7 @@ bazar-af/
 ## As built
 ```
 backend/app/{core,db,models,schemas,services,routers,analytics}  seed.py  seed_data.py  export_openapi.py
-backend/alembic/versions/0001_initial_schema.py  0002_widen_survey_gender.py
+backend/alembic/versions/0001_initial_schema.py  0002 … 0005 (0005 drops the survey tables)
 backend/tests/{unit,api,integration}
 frontend/src/app/...            pages (App Router) + api/auth/*, api/proxy/[...path]
 frontend/src/{components,lib}   UI, typed API client, cart, cookies

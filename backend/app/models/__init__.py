@@ -12,10 +12,8 @@ from sqlalchemy import (
     Index,
     Integer,
     Numeric,
-    SmallInteger,
     String,
     Text,
-    UniqueConstraint,
     func,
     text,
 )
@@ -181,12 +179,12 @@ class Notification(Base):
     """In-app notification (shown under the bell). Email delivery can be layered on later without changing this table."""
 
     __tablename__ = "notifications"
-    __table_args__ = (Index("ix_notifications_user_created", "user_id", "created_at"),)
+    __table_args__ = (Index("ix_notifications_user_created", "user_id", "created_at"), Index("ix_notifications_user_unread", "user_id", "read_at"))
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     order_id: Mapped[int | None] = mapped_column(ForeignKey("orders.id", ondelete="CASCADE"))
     product_id: Mapped[int | None] = mapped_column(ForeignKey("products.id", ondelete="CASCADE"))
-    kind: Mapped[str] = mapped_column(String(30))  # order_confirmed | order_ready | order_cancelled | new_product
+    kind: Mapped[str] = mapped_column(String(30))  # new_order (to the seller) | order_confirmed | order_ready | order_cancelled | new_product
     title: Mapped[str] = mapped_column(String(120))
     message: Mapped[str] = mapped_column(String(400))
     read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
@@ -214,47 +212,3 @@ class AuditLog(Base):
     ip: Mapped[str | None] = mapped_column(INET)
     request_id: Mapped[str | None] = mapped_column(String(40))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-
-
-class SurveyQuestion(Base, Timestamps):
-    __tablename__ = "survey_questions"
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    construct: Mapped[str] = mapped_column(String(5))
-    code: Mapped[str] = mapped_column(String(10), unique=True)
-    text_en: Mapped[str] = mapped_column(Text)
-    text_fa: Mapped[str | None] = mapped_column(Text)
-    position: Mapped[int] = mapped_column(Integer)
-    is_reverse_scored: Mapped[bool] = mapped_column(Boolean, default=False, server_default=text("false"))
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default=text("true"))
-    __table_args__ = (CheckConstraint("construct IN ('PU','PEOU','TR','CO','AC','WA')", name="ck_construct"),)
-
-
-class SurveyResponse(Base, Timestamps):
-    __tablename__ = "survey_responses"
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    consent: Mapped[bool] = mapped_column(Boolean)
-    respondent_type: Mapped[str] = mapped_column(String(10))
-    age_band: Mapped[str | None] = mapped_column(String(10))
-    gender: Mapped[str | None] = mapped_column(String(20))
-    district: Mapped[str | None] = mapped_column(String(40))
-    business_type: Mapped[str | None] = mapped_column(String(60))
-    uses_mobile_money: Mapped[bool | None] = mapped_column(Boolean)
-    completion_seconds: Mapped[int | None] = mapped_column(Integer)
-    is_valid: Mapped[bool] = mapped_column(Boolean, default=True, server_default=text("true"))
-    invalid_reason: Mapped[str | None] = mapped_column(String(60))
-    is_synthetic: Mapped[bool] = mapped_column(Boolean, default=False, server_default=text("false"))
-    answers: Mapped[list["SurveyAnswer"]] = relationship(back_populates="response", cascade="all, delete-orphan")
-    __table_args__ = (
-        CheckConstraint("consent", name="ck_consent"),
-        CheckConstraint("respondent_type IN ('seller','buyer','other')", name="ck_resp_type"),
-    )
-
-
-class SurveyAnswer(Base):
-    __tablename__ = "survey_answers"
-    __table_args__ = (UniqueConstraint("response_id", "question_id"), CheckConstraint("value BETWEEN 1 AND 5", name="ck_likert"))
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    response_id: Mapped[int] = mapped_column(ForeignKey("survey_responses.id", ondelete="CASCADE"))
-    question_id: Mapped[int] = mapped_column(ForeignKey("survey_questions.id"), index=True)
-    value: Mapped[int] = mapped_column(SmallInteger)
-    response: Mapped[SurveyResponse] = relationship(back_populates="answers")

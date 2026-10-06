@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
+import { useLiveRefresh } from "@/components/Live";
 import { useSession } from "@/components/Session";
 import { Alert, ErrorState, Guard, LoadingRows, StatusChip, useLoad } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
@@ -17,6 +18,7 @@ function Detail() {
   const placed = useSearchParams().get("placed");
   const { user, loading } = useSession();
   const o = useLoad(() => api<Order>(`orders/${id}`), [id]);
+  useLiveRefresh(o.refresh);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [reason, setReason] = useState("");

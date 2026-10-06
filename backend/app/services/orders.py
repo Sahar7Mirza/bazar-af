@@ -66,6 +66,14 @@ def create_order(db: Session, buyer: User, data: OrderIn, ip: str | None = None)
     order.total_afn = total
     db.add(order)
     db.flush()
+    notifications.new_order_for_seller(
+        db,
+        order,
+        seller.user_id,
+        buyer.full_name.split()[0],
+        sum(q for _, q in lines),
+        "Mobile Money" if data.payment_preference == "mobile_money" else "Cash",
+    )
     audit.record(
         db,
         "order.create",
@@ -133,6 +141,7 @@ def advance(db: Session, seller: User, oid: int, target: str, pickup_in_minutes:
         raise Conflict(f"Cannot move an order from {o.status.value} to {target}", code="illegal_transition")
     before = o.status.value
     o.status = OrderStatus(target)
+    notifications.resolve_new_order(db, o.id)
     if o.status == OrderStatus.confirmed:
         minutes = pickup_in_minutes or DEFAULT_PICKUP_MINUTES
         o.estimated_pickup_at = datetime.now(UTC) + timedelta(minutes=minutes)
@@ -153,6 +162,7 @@ def cancel(db: Session, user: User, oid: int, reason: str | None) -> Order:
         p = db.get(Product, it.product_id, with_for_update=True)
         p.stock_qty += it.quantity
     o.status, o.cancel_reason = OrderStatus.cancelled, reason
+    notifications.resolve_new_order(db, o.id)
     if user.role == Role.seller:
         notifications.order_cancelled_by_seller(db, o, _shop_name(db, o), reason)
     audit.record(db, "order.cancel", actor_id=user.id, entity_type="order", entity_id=o.id, detail={"by": user.role.value})

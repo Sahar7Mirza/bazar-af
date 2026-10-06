@@ -20,4 +20,5 @@ export interface Question { id: number; construct: string; code: string; text_en
 export const DISTRICTS = [...Array.from({ length: 22 }, (_, i) => `PD${i + 1}`), "Other"];
 export const PROVIDERS = ["M-Paisa", "HesabPay", "Afghan Wireless Mobile Money", "MoneyPay", "Other"];
 export interface AppNotification { id: number; order_id: number | null; product_id: number | null; kind: string; title: string; message: string; read_at: string | null; created_at: string }
+export interface LiveState { unread: number; latest: { id: number; kind: string; title: string; message: string; order_id: number | null } | null; pending_orders?: number }
 export type RecommendedProduct = Product & { reason: string | null; match: number };

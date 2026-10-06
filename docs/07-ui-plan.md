@@ -16,8 +16,8 @@ Design: **Apple.com-style** (see docs/11): large light hero, whitespace, #f5f5f7
 | `/admin` | admin | Stats |
 | `/admin/users`, `/admin/sellers`, `/admin/orders`, `/admin/audit` | admin | Paginated tables, approve/reject, deactivate |
 
-| `/survey` | public | Consent, demographics, Likert items (one construct per step, progress bar, keyboard friendly) |
-| `/admin/research` | admin | Progress vs 150 target, construct chart, correlation heat-map, regression table, preference split, CSV export |
+| `/research` | public | Open, anonymous adoption figures: share with 95% CI, provider, week, district, category, plain-language tests |
+| `/admin/research` | admin | Same analysis with every group visible and an anonymised CSV download |
 
 Every data view has four states: **loading** (skeleton), **error** (message + retry + request id), **empty** (explanation + next action) and **content**. Accessibility: semantic landmarks, labelled inputs, visible focus, colour-contrast AA, charts with text tables as alternatives, `prefers-reduced-motion`.
 

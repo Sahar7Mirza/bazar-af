@@ -51,7 +51,9 @@ export function useLoad<T>(loader: () => Promise<T>, deps: unknown[]) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
   const fresh = res?.key === key;  // stale results are hidden while the next request is in flight
-  return { data: fresh ? res.data : undefined, error: fresh ? res.error : undefined, loading: !fresh, reload: () => setTick((t) => t + 1) };
+  // refresh() swaps in new data quietly (no loading flash); used by live updates. reload() shows the loading state.
+  const refresh = () => { loader().then((data) => setRes({ key, data })).catch(() => {}); };
+  return { data: fresh ? res.data : undefined, error: fresh ? res.error : undefined, loading: !fresh, reload: () => setTick((t) => t + 1), refresh };
 }
 
 export function Field({ label, error, hint, children, id }: { label: string; error?: string; hint?: string; children: ReactNode; id: string }) {
