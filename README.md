@@ -41,7 +41,7 @@ Captured from the running app with the seeded demo data (all data is synthetic).
 | ![Mobile](docs/img/14-mobile-home.png) | ![Dark mode](docs/img/15-dark-products.png) |
 | Responsive layout on a phone | Dark mode follows the system setting |
 
-Research page (mobile-money adoption from real orders; the screenshot below predates this change):
+Research page (mobile-money adoption from real orders, with plain-language insight cards):
 
 ![Research dashboard](docs/img/11-admin-research.png)
 
