@@ -64,9 +64,9 @@ export function TabNav({ items, current }: { items: [string, string][]; current:
   return <nav className="tabs" aria-label="Section">{items.map(([href, label]) => <Link key={href} href={href} aria-current={current === href ? "page" : undefined}>{label}</Link>)}</nav>;
 }
 
-export function Guard({ roles, user, loading, children }: { roles: string[]; user: { role: string } | null; loading: boolean; children: ReactNode }) {
+export function Guard({ roles, user, loading, children, denied }: { roles: string[]; user: { role: string } | null; loading: boolean; children: ReactNode; denied?: string }) {
   if (loading) return <div className="wrap page"><LoadingRows /></div>;
   if (!user) return <div className="wrap page"><EmptyState icon="lock" title="Please sign in" text="You need an account to see this page." action={<Link className="btn" href="/login">Sign in</Link>} /></div>;
-  if (!roles.includes(user.role)) return <div className="wrap page"><EmptyState icon="ban" title="Not available for your account type" action={<Link className="btn quiet" href="/">Back home</Link>} /></div>;
+  if (!roles.includes(user.role)) return <div className="wrap page"><EmptyState icon="ban" title="Not available for your account type" text={denied} action={<Link className="btn quiet" href="/">Back home</Link>} /></div>;
   return <>{children}</>;
 }

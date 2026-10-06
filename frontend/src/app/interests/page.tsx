@@ -22,7 +22,7 @@ export default function Interests() {
     catch (e) { setMsg({ kind: "bad", text: e instanceof ApiError ? e.message : "Could not save. Try again." }); } finally { setBusy(false); }
   }
   return (
-    <Guard roles={["buyer"]} user={user} loading={loading}>
+    <Guard roles={["buyer"]} user={user} loading={loading} denied="This page is for buyer accounts.">
       <div className="mid page">
         <h1 style={{ fontSize: "2.2rem" }}>My interests</h1>
         <p className="muted">Choose what you like to buy. We use this to recommend products and to notify you when a seller lists something new in these categories.</p>
