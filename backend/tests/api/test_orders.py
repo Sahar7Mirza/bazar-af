@@ -158,6 +158,11 @@ def test_order_list_pagination_and_filter(client, db):
     r = client.get("/api/v1/orders", params={"page_size": 5}, headers=hb).json()
     assert r["total"] == 7 and r["pages"] == 2 and len(r["items"]) == 5
     assert client.get("/api/v1/orders", params={"status": "completed"}, headers=hb).json()["total"] == 0
+    # chip counts ignore the status filter and always cover the whole list
+    counts = client.get("/api/v1/orders", params={"status": "completed"}, headers=hb).json()["counts"]
+    assert counts == {"pending": 7, "confirmed": 0, "ready": 0, "completed": 0, "cancelled": 0}
+    make_user(db, "admin@x.af", Role.admin)
+    assert client.get("/api/v1/admin/orders", headers=token(client, "admin@x.af")).json()["counts"]["pending"] == 7
     assert client.get("/api/v1/orders", params={"status": "bogus"}, headers=hb).status_code == 422
 
 

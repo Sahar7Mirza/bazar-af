@@ -49,8 +49,11 @@ def _popularity(db: Session) -> dict[int, int]:
     return {pid: n for pid, n in rows}
 
 
-def recommend(db: Session, user: User | None, limit: int = 8) -> list[tuple[Product, str, str | None, str]]:
-    """Returns (product, seller_name, district, reason) tuples, best first."""
+MAX_SCORE = 6.5  # 3 interest + 2 ordered category + 1 popularity + 0.5 freshness
+
+
+def recommend(db: Session, user: User | None, limit: int = 8) -> list[tuple[Product, str, str | None, str, int]]:
+    """Returns (product, seller_name, district, reason, match_percent) tuples, best first."""
     pool = db.execute(catalog.visible_products().where(Product.stock_qty > 0).order_by(Product.id.desc()).limit(POOL)).all()
     if not pool:
         return []
@@ -86,7 +89,7 @@ def recommend(db: Session, user: User | None, limit: int = 8) -> list[tuple[Prod
             score -= 1
         scored.append((score, p.id, p, shop, district, reason))
     scored.sort(key=lambda t: (-t[0], -t[1]))
-    return [(p, shop, district, reason) for _, _, p, shop, district, reason in scored[:limit]]
+    return [(p, shop, district, reason, max(0, min(100, round(sc / MAX_SCORE * 100)))) for sc, _, p, shop, district, reason in scored[:limit]]
 
 
 def similar(db: Session, product_id: int, limit: int = 4) -> list[tuple[Product, str, str | None]]:

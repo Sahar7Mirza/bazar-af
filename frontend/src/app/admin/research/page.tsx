@@ -1,6 +1,7 @@
 "use client";
 import { AdminShell } from "@/components/AdminShell";
 import { BarChart, Donut } from "@/components/charts";
+import { Icon } from "@/components/Icon";
 import { EmptyState, ErrorState, LoadingRows, useLoad } from "@/components/ui";
 import { api } from "@/lib/api";
 
@@ -12,6 +13,33 @@ interface Mkt {
 }
 const pct = (r: Row) => (r.total ? Math.round((r.mobile_money / r.total) * 1000) / 10 : 0);
 
+const share = (w: Week) => (w.total ? (w.mobile_money / w.total) * 100 : 0);
+const MIN_WEEK = 5; // a week with fewer orders is too small to call a trend
+function Delta({ diff, unit }: { diff: number; unit: string }) {
+  const kind = Math.abs(diff) < 0.5 ? "flat" : diff > 0 ? "up" : "down";
+  const sign = diff > 0 ? "+" : "";
+  return <span className={`delta ${kind}`}><Icon name={kind === "flat" ? "flat" : kind === "up" ? "trend-up" : "trend-down"} size={14} /> {sign}{Math.round(diff * 10) / 10}{unit} vs previous week</span>;
+}
+
+/** Plain-language headlines computed from the same order data, so a reader sees the finding before the charts. */
+function Insights({ d }: { d: Mkt }) {
+  const w = d.weekly, last = w[w.length - 1], prev = w[w.length - 2];
+  const best = [...d.by_category, ...d.by_district].sort((a, b) => pct(b) - pct(a))[0];
+  const provider = Object.entries(d.providers).sort((a, b) => b[1] - a[1])[0];
+  const mmOrders = d.preference.mobile_money ?? 0;
+  return (
+    <div className="grid g3s" style={{ marginTop: 16 }}>
+      <div className="card insight"><span className="k"><Icon name="trend-up" size={16} /> Latest week</span>
+        {last ? (<><p><strong>{Math.round(share(last))}%</strong> of orders in the week of {last.week} chose mobile money ({last.mobile_money} of {last.total}).</p>
+          {prev && last.total >= MIN_WEEK && prev.total >= MIN_WEEK ? <Delta diff={share(last) - share(prev)} unit=" pts" /> : <span className="muted small">Too few orders to compare with the previous week (needs {MIN_WEEK}+ in each).</span>}</>) : <p className="muted">No weekly data yet.</p>}</div>
+      <div className="card insight"><span className="k"><Icon name="wallet" size={16} /> Favourite provider</span>
+        {provider ? <p><strong>{provider[0]}</strong> is used in {Math.round((provider[1] / Math.max(1, mmOrders)) * 100)}% of mobile-money orders ({provider[1]} of {mmOrders}).</p> : <p className="muted">No mobile-money orders yet.</p>}</div>
+      <div className="card insight"><span className="k"><Icon name="trophy" size={16} /> Strongest segment</span>
+        {best ? <p><strong>{best.name}</strong> leads with <strong>{pct(best)}%</strong> mobile money across {best.total} orders.</p> : <p className="muted">Segments appear once they have 5 or more orders.</p>}</div>
+    </div>
+  );
+}
+
 export default function Research() {
   const m = useLoad(() => api<Mkt>("admin/analytics/marketplace"), []);
   const d = m.data;
@@ -21,7 +49,8 @@ export default function Research() {
         <EmptyState icon="bag" title="No orders yet" text="Adoption figures appear here as buyers place orders and choose Cash or Mobile Money at checkout." />
       ) : (<>
         <p className="muted">Based on the payment preference buyers choose at checkout (cancelled orders excluded). No money moves on Bazar.af, so these are stated preferences, not payments.</p>
-        <div className="grid g3" style={{ marginTop: 16 }}>
+        <Insights d={d} />
+        <div className="grid g3s" style={{ marginTop: 20 }}>
           <div className="card"><h3>Orders choosing mobile money</h3><div className="stat">{d.mobile_money_share_pct}%</div><p className="muted small">{d.preference.mobile_money ?? 0} of {d.orders} orders</p></div>
           <div className="card"><h3>Buyers using mobile money</h3><div className="stat">{d.buyers.share_pct}%</div><p className="muted small">{d.buyers.mobile_money} of {d.buyers.total} buyers chose it at least once</p></div>
           <div className="card"><h3>Cash vs Mobile Money</h3>

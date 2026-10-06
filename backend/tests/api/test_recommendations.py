@@ -39,6 +39,7 @@ def test_recommendations_follow_interests(client, db):
     items = client.get("/api/v1/recommendations?limit=3", headers=h).json()
     assert items[0]["id"] == phone.id and items[0]["reason"] == "Matches your interest in Electronics"
     assert {i["id"] for i in items} == {bread.id, cake.id, phone.id} and items[1]["reason"] == "Popular in Kabul"
+    assert items[0]["match"] > 50 > items[1]["match"] >= 0 and all(0 <= i["match"] <= 100 for i in items)
 
 
 def test_recommendations_use_order_history_and_demote_already_bought(client, db):

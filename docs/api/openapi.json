@@ -3639,6 +3639,11 @@
               }
             ],
             "title": "Reason"
+          },
+          "match": {
+            "type": "integer",
+            "title": "Match",
+            "default": 0
           }
         },
         "type": "object",

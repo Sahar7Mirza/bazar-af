@@ -1,6 +1,6 @@
 export type Role = "buyer" | "seller" | "admin";
 export interface User { id: number; email: string; full_name: string; phone: string | null; district: string | null; role: Role; is_active: boolean }
-export interface Page<T> { items: T[]; page: number; page_size: number; total: number; pages: number }
+export interface Page<T> { items: T[]; page: number; page_size: number; total: number; pages: number; counts?: Record<string, number> }
 export interface Category { id: number; name: string; slug: string; is_active: boolean }
 export interface Product {
   id: number; seller_id: number; category_id: number | null; name: string; description: string | null; price_afn: string; unit: string; stock_qty: number;
@@ -20,4 +20,4 @@ export interface Question { id: number; construct: string; code: string; text_en
 export const DISTRICTS = [...Array.from({ length: 22 }, (_, i) => `PD${i + 1}`), "Other"];
 export const PROVIDERS = ["M-Paisa", "HesabPay", "Afghan Wireless Mobile Money", "MoneyPay", "Other"];
 export interface AppNotification { id: number; order_id: number | null; product_id: number | null; kind: string; title: string; message: string; read_at: string | null; created_at: string }
-export type RecommendedProduct = Product & { reason: string | null };
+export type RecommendedProduct = Product & { reason: string | null; match: number };

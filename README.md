@@ -36,6 +36,8 @@ Captured from the running app with the seeded demo data (all data is synthetic).
 | Buyer home: recommendations based on interests and past orders | Buyers choose the categories they care about |
 | ![Notifications](docs/img/18-notifications.png) | |
 | Alerts for order updates and new products in followed categories | |
+| ![Order status chips](docs/img/19-order-status-chips.png) | ![Match strength](docs/img/20-match-strength.png) |
+| Orders filter as status chips with live counts | Each recommendation shows a match-strength bar |
 | ![Mobile](docs/img/14-mobile-home.png) | ![Dark mode](docs/img/15-dark-products.png) |
 | Responsive layout on a phone | Dark mode follows the system setting |
 

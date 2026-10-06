@@ -11,6 +11,7 @@ from app.schemas.auth import UserOut
 from app.schemas.catalog import CategoryIn, CategoryOut, CategoryPatch, OrderOut, ProductOut, ReviewIn, SellerOut, UserPatch
 from app.services import admin as svc
 from app.services import catalog
+from app.services import orders as orders_svc
 
 router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(require_roles(Role.admin))])
 admin_user = require_roles(Role.admin)
@@ -78,7 +79,7 @@ def orders(
     db: Session = Depends(get_db),
 ):
     rows, total = paginate(db, svc.orders_stmt(status), params)
-    return envelope([OrderOut.model_validate(r) for r in rows], total, params)
+    return {**envelope([OrderOut.model_validate(r) for r in rows], total, params), "counts": orders_svc.status_counts(db, svc.orders_stmt(None))}
 
 
 @router.get("/stats")

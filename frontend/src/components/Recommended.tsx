@@ -21,7 +21,7 @@ export function Recommended({ limit = 4 }: { limit?: number }) {
     <section className="section"><div className="wrap">
       <div className="row between"><h2>{buyer ? "Recommended for you" : "Popular in Kabul"}</h2>{buyer && <Link href="/interests"><Icon name="heart" size={14} /> My interests</Link>}</div>
       {noInterests && <p className="muted">Pick the categories you care about and we will tailor this list and tell you when something new arrives. <Link href="/interests">Choose interests</Link></p>}
-      <div className="grid g4" style={{ marginTop: 20 }}>{rec.data.map((p: Product & { reason: string | null }) => <ProductCard key={p.id} p={p} icon={categoryIcon(name.get(p.category_id ?? -1))} why={buyer ? p.reason ?? undefined : undefined} />)}</div>
+      <div className="grid g4" style={{ marginTop: 20 }}>{rec.data.map((p: RecommendedProduct) => <ProductCard key={p.id} p={p} icon={categoryIcon(name.get(p.category_id ?? -1))} why={buyer ? p.reason ?? undefined : undefined} match={buyer ? p.match : undefined} />)}</div>
     </div></section>
   );
 }
