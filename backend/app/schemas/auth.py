@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
@@ -58,6 +59,7 @@ class UserOut(BaseModel):
     district: str | None
     role: str
     is_active: bool
+    email_verified_at: datetime | None = None
 
 
 class TokenOut(BaseModel):
@@ -66,3 +68,23 @@ class TokenOut(BaseModel):
     token_type: str = "bearer"
     expires_in: int
     user: UserOut
+
+
+class ForgotIn(BaseModel):
+    email: EmailStr
+
+
+class ResetIn(BaseModel):
+    token: str = Field(min_length=20, max_length=200)
+    password: str = Field(min_length=10, max_length=128)
+
+    @field_validator("password")
+    @classmethod
+    def strong(cls, v: str) -> str:
+        if not PASSWORD_RE.match(v):
+            raise ValueError("Password needs at least 10 characters with letters and digits")
+        return v
+
+
+class TokenIn(BaseModel):
+    token: str = Field(min_length=20, max_length=200)

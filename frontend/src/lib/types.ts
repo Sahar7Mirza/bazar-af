@@ -1,5 +1,5 @@
 export type Role = "buyer" | "seller" | "admin";
-export interface User { id: number; email: string; full_name: string; phone: string | null; district: string | null; role: Role; is_active: boolean }
+export interface User { id: number; email: string; full_name: string; phone: string | null; district: string | null; role: Role; is_active: boolean; email_verified_at?: string | null }
 export interface Page<T> { items: T[]; page: number; page_size: number; total: number; pages: number; counts?: Record<string, number> }
 export interface Category { id: number; name: string; slug: string; is_active: boolean }
 export interface Product {

@@ -4,10 +4,11 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
+from app.core import mail
 from app.core.config import get_settings
 from app.core.errors import AppError, Conflict, Forbidden, TooManyRequests, Unauthorized
 from app.core.security import DUMMY_HASH, create_access_token, hash_password, hash_token, new_refresh_token, verify_password
-from app.models import RefreshToken, Role, SellerProfile, SellerStatus, User
+from app.models import EmailToken, RefreshToken, Role, SellerProfile, SellerStatus, User
 from app.schemas.auth import RegisterIn
 from app.services import audit
 
@@ -41,6 +42,7 @@ def register(db: Session, data: RegisterIn, ip: str | None = None) -> User:
         )
     audit.record(db, "user.register", actor_id=user.id, entity_type="user", entity_id=user.id, detail={"role": user.role.value}, ip=ip)
     db.commit()
+    send_verification(db, user)
     return user
 
 
@@ -122,3 +124,87 @@ def logout(db: Session, raw: str, actor_id: int | None = None):
         )
         audit.record(db, "auth.logout", actor_id=tok.user_id)
         db.commit()
+
+
+# ---- one-time email links: password reset and email verification -------------------------------------------------
+
+COOLDOWN_SECONDS = 60  # at most one email of each kind per minute per account (stored in the database, so it works on serverless)
+
+
+def _new_token(db: Session, user: User, kind: str, lifetime: timedelta) -> str | None:
+    now = datetime.now(UTC)
+    last = db.scalar(
+        select(EmailToken.created_at).where(EmailToken.user_id == user.id, EmailToken.kind == kind).order_by(EmailToken.id.desc()).limit(1)
+    )
+    if last and (now - last).total_seconds() < COOLDOWN_SECONDS:
+        return None
+    db.execute(update(EmailToken).where(EmailToken.user_id == user.id, EmailToken.kind == kind, EmailToken.used_at.is_(None)).values(used_at=now))
+    raw, h = new_refresh_token()
+    db.add(EmailToken(user_id=user.id, kind=kind, token_hash=h, expires_at=now + lifetime))
+    db.commit()
+    return raw
+
+
+def send_verification(db: Session, user: User) -> None:
+    if user.email_verified_at:
+        return
+    s = get_settings()
+    raw = _new_token(db, user, "verify", timedelta(hours=s.verify_token_hours))
+    if raw:
+        link = f"{s.app_url.rstrip('/')}/verify-email?token={raw}"
+        mail.send_email(
+            user.email,
+            "Confirm your email for Bazar.af",
+            f"Hi {user.full_name.split()[0]},\n\nPlease confirm your email address so we can reach you about your orders.",
+            link,
+        )
+
+
+def request_password_reset(db: Session, email: str, ip: str | None = None) -> None:
+    """Always behaves the same whether or not the email exists, so nobody can use it to find out who has an account."""
+    s = get_settings()
+    user = db.scalar(select(User).where(User.email == email.lower()))
+    if not user or not user.is_active:
+        return
+    raw = _new_token(db, user, "reset", timedelta(minutes=s.reset_token_minutes))
+    audit.record(db, "auth.reset_requested", actor_id=user.id, ip=ip)
+    db.commit()
+    if raw:
+        link = f"{s.app_url.rstrip('/')}/reset-password?token={raw}"
+        mail.send_email(
+            user.email,
+            "Reset your Bazar.af password",
+            f"Hi {user.full_name.split()[0]},\n\nSomeone asked to reset the password for this account. "
+            f"The link works for {s.reset_token_minutes} minutes and only once. "
+            "If it was not you, ignore this email and your password stays the same.",
+            link,
+        )
+
+
+def _use_token(db: Session, raw: str, kind: str) -> EmailToken:
+    tok = db.scalar(select(EmailToken).where(EmailToken.token_hash == hash_token(raw), EmailToken.kind == kind).with_for_update())
+    if not tok or tok.used_at or tok.expires_at <= datetime.now(UTC):
+        raise AppError("This link is invalid or has expired. Please request a new one.", code="invalid_token", status_code=400)
+    tok.used_at = datetime.now(UTC)
+    return tok
+
+
+def reset_password(db: Session, raw: str, new_password: str, ip: str | None = None) -> None:
+    tok = _use_token(db, raw, "reset")
+    user = db.get(User, tok.user_id)
+    user.password_hash = hash_password(new_password)
+    user.failed_logins, user.locked_until = 0, None
+    user.email_verified_at = user.email_verified_at or datetime.now(UTC)  # they proved they own the inbox
+    db.execute(
+        update(RefreshToken).where(RefreshToken.user_id == user.id, RefreshToken.revoked_at.is_(None)).values(revoked_at=datetime.now(UTC))
+    )  # sign out everywhere
+    audit.record(db, "auth.password_reset", actor_id=user.id, ip=ip)
+    db.commit()
+
+
+def verify_email(db: Session, raw: str) -> None:
+    tok = _use_token(db, raw, "verify")
+    user = db.get(User, tok.user_id)
+    user.email_verified_at = user.email_verified_at or datetime.now(UTC)
+    audit.record(db, "auth.email_verified", actor_id=user.id)
+    db.commit()

@@ -29,7 +29,7 @@ p { margin: 0 0 1em; } .muted { color: var(--muted); } .small { font-size: .875r
   .nav.open { display: flex; } .btn.menu-btn { display: inline-flex; margin-left: auto; } .nav-right { margin-left: 0; } }
 
 .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; } .narrow { max-width: 440px; margin: 0 auto; padding: 0 20px; } .mid { max-width: 780px; margin: 0 auto; padding: 0 20px; }
-.section { padding: 72px 0; } .alt { background: var(--bg-alt); } .page { padding: 40px 0 72px; min-height: 70vh; }
+.section { padding: 72px 0; } .alt { background: var(--bg-alt); } .page { padding-block: 40px 72px; min-height: 70vh; }
 .hero { text-align: center; padding: 96px 0 72px; } .hero p.lead { font-size: clamp(1.1rem, 2.4vw, 1.5rem); color: var(--muted); max-width: 640px; margin: 0 auto 1.4em; }
 .eyebrow { font-size: 1rem; font-weight: 600; color: var(--brand); margin-bottom: 12px; }
 .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; } .row.center { justify-content: center; } .between { justify-content: space-between; } .grow { flex: 1; }
@@ -100,3 +100,5 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .toast { position: fixed; right: 20px; bottom: 20px; z-index: 80; max-width: 420px; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 16px; background: var(--card); border: 1px solid var(--line); box-shadow: var(--shadow); animation: toast-in .25s ease-out; } .toast > svg { color: var(--brand); flex: none; } .toast div { display: flex; flex-direction: column; font-size: .9rem; min-width: 0; } .toast span { color: var(--muted); }
 @keyframes toast-in { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (max-width: 600px) { .toast { left: 12px; right: 12px; bottom: 12px; max-width: none; } }
+
+.notice { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 8px 20px; background: var(--blue-bg); color: var(--text); font-size: .9rem; border-bottom: 1px solid var(--line); } .notice svg { color: var(--brand); }
