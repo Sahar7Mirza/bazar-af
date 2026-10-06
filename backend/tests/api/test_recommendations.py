@@ -91,8 +91,8 @@ def test_hidden_product_notifies_only_when_published(client, db):
     sh = token(client, "s@x.af")
     body = {"name": "Pie", "price_afn": "50.00", "unit": "piece", "stock_qty": 5, "category_id": food.id, "status": "hidden"}
     pid = client.post("/api/v1/products", json=body, headers=sh).json()["id"]
-    assert client.get("/api/v1/notifications/unread-count", headers=token(client, "b@x.af")).json() == {"unread": 0}
+    assert client.get("/api/v1/notifications/unread-count", headers=token(client, "b@x.af")).json()["unread"] == 0
     client.patch(f"/api/v1/products/{pid}", json={"status": "active"}, headers=sh)
-    assert client.get("/api/v1/notifications/unread-count", headers=token(client, "b@x.af")).json() == {"unread": 1}
+    assert client.get("/api/v1/notifications/unread-count", headers=token(client, "b@x.af")).json()["unread"] == 1
     client.patch(f"/api/v1/products/{pid}", json={"price_afn": "55.00"}, headers=sh)
-    assert client.get("/api/v1/notifications/unread-count", headers=token(client, "b@x.af")).json() == {"unread": 1}
+    assert client.get("/api/v1/notifications/unread-count", headers=token(client, "b@x.af")).json()["unread"] == 1

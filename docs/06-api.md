@@ -31,15 +31,15 @@ Base path `/api/v1`. JSON only. Auth: `Authorization: Bearer <access JWT>` (the 
 | | GET `/orders/{id}` | owner buyer / owner seller / admin |
 | | POST `/orders/{id}/status` (confirm, ready, complete). Confirming accepts optional `pickup_in_minutes` (5-10080, default 60) and sets `estimated_pickup_at` | seller (owner) |
 | Interests and recommendations | GET/PUT `/me/interests` (buyer, max 8 categories), GET `/recommendations?limit=` (personalised for signed-in buyers, popular for everyone else), GET `/products/{id}/similar` | buyer / public |
-| Notifications | GET `/notifications` (`?unread=true`, paginated), GET `/notifications/unread-count`, POST `/notifications/{id}/read`, POST `/notifications/read-all` | any signed-in user (own only) |
+| Notifications | GET `/notifications` (`?unread=true`, paginated), GET `/notifications/unread-count` (live state: `unread`, newest alert, and for sellers `pending_orders`; the app polls it every 5 s), POST `/notifications/{id}/read`, POST `/notifications/read-all` | any signed-in user (own only) |
 | | POST `/orders/{id}/cancel` | buyer (pending) / seller |
 | Admin | GET `/admin/users`, PATCH `/admin/users/{id}` (activate/deactivate) | admin |
 | | GET `/admin/sellers`, POST `/admin/sellers/{id}/approve` / `reject` | admin |
 | | GET `/admin/orders` (with status `counts`), GET `/admin/stats` | admin |
 | | GET `/admin/audit` | admin |
 
-| Survey | GET `/survey`, POST `/survey/responses` | public (rate-limited) |
-| Research | GET `/admin/research/{summary,descriptives,reliability,correlations,regression,export.csv}`, GET `/admin/analytics/marketplace` | admin |
+| Research (public) | GET `/research/summary` | public, anonymous, groups under 5 orders hidden |
+| Research (admin) | GET `/admin/research/summary`, GET `/admin/research/export.csv` | admin |
 
 Status codes: 200/201/204; 400 validation; 401 unauthenticated; 403 forbidden; 404 (also for other users' resources); 409 conflict (email taken, insufficient stock, illegal state change); 422 schema; 429 rate limit.
 Interactive docs: `/docs` (Swagger) and `/redoc`, generated from Pydantic schemas.

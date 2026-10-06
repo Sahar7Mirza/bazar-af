@@ -8,8 +8,8 @@ Each phase: feature branch → tests green → PR/merge (`--no-ff`) into `main` 
 | 1 | `feature/backend-foundation` | FastAPI skeleton, settings, PostgreSQL, Alembic migrations, logging, error handling, health | migrations apply; health test |
 | 2 | `feature/auth-rbac` | Register/login/refresh/logout, bcrypt, JWT, lockout, RBAC deps, audit log | unit + API tests |
 | 3 | `feature/catalog-orders` | Seller profile, categories, products, orders, admin, pagination, seed data | API + integration tests |
-| 3b | `feature/research-module` | Survey tables, public submission, analysis services (descriptives, alpha, correlation, OLS), synthetic seed ~160 responses | stats verified against known values |
-| 4 | `feature/frontend` | Next.js TS UI for all three roles, survey page, research dashboard, all UI states | typecheck, lint, build |
+| 3b | `feature/research-module` | Original survey module (later removed; adoption is now measured from checkout choices) | stats verified against known values |
+| 4 | `feature/frontend` | Next.js TS UI for all three roles, research pages, all UI states | typecheck, lint, build |
 | 5 | `feature/tests-docker-docs` | Playwright E2E, usability test kit, Dockerfiles, compose, CI, README, deployment guide | full suite green |
 
 GitHub: remote added when the owner creates the repo; nothing with secrets is committed (`.env` ignored, `.env.example` tracked).

@@ -2,18 +2,20 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useSession } from "@/components/Session";
+import { useLiveRefresh } from "@/components/Live";
 import { Icon } from "@/components/Icon";
 import { EmptyState, ErrorState, Guard, LoadingRows, Pager, useLoad } from "@/components/ui";
 import { api } from "@/lib/api";
 import { dateTime } from "@/lib/format";
 import type { AppNotification, Page } from "@/lib/types";
 
-const KIND_ICON: Record<string, string> = { order_confirmed: "check", order_ready: "package-check", order_cancelled: "package-x", new_product: "sparkles" };
+const KIND_ICON: Record<string, string> = { new_order: "bag", order_confirmed: "check", order_ready: "package-check", order_cancelled: "package-x", new_product: "sparkles" };
 
 export default function Notifications() {
   const { user, loading } = useSession();
   const [page, setPage] = useState(1);
   const res = useLoad(() => api<Page<AppNotification>>("notifications", { query: { page, page_size: 10 } }), [page]);
+  useLiveRefresh(res.refresh);
   async function open(n: AppNotification) {
     if (!n.read_at) { await api(`notifications/${n.id}/read`, { method: "POST" }).catch(() => {}); res.reload(); }
   }

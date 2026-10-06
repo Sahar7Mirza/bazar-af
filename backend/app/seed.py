@@ -23,13 +23,10 @@ from app.models import (
     Role,
     SellerProfile,
     SellerStatus,
-    SurveyAnswer,
-    SurveyQuestion,
-    SurveyResponse,
     User,
 )
 from app.schemas.catalog import PROVIDERS
-from app.seed_data import BUSINESS_TYPES, CATEGORIES, DISTRICT_WEIGHTS, FIRST, LAST, PRODUCTS, QUESTIONS, SHOPS
+from app.seed_data import CATEGORIES, DISTRICT_WEIGHTS, FIRST, LAST, PRODUCTS, SHOPS
 from app.services.catalog import slugify
 
 ADMIN_EMAIL = "admin@demo.bazar.af"
@@ -49,7 +46,7 @@ def reset(db):
     db.expunge_all()  # drop stale identities so re-seeding in the same session is clean
 
 
-def seed(db, rng: random.Random, pw: str, n_buyers=30, n_orders=150, n_survey=165):
+def seed(db, rng: random.Random, pw: str, n_buyers=30, n_orders=150):
     ph = hash_password(pw)  # one hash reused: demo accounts share the demo password
     now = datetime.now(UTC)
     cats = {}
@@ -165,57 +162,8 @@ def seed(db, rng: random.Random, pw: str, n_buyers=30, n_orders=150, n_survey=16
         db.add(o)
     db.flush()
 
-    # ---- questionnaire + synthetic responses (latent-variable model so the analysis shows realistic structure)
-    qrows = {}
-    for pos, (code, construct, en, fa, rev) in enumerate(QUESTIONS, 1):
-        q = SurveyQuestion(code=code, construct=construct, text_en=en, text_fa=fa, position=pos, is_reverse_scored=rev)
-        db.add(q)
-        qrows[code] = q
-    db.flush()
-    clip = lambda v: int(min(5, max(1, round(v))))  # noqa: E731
-    for n in range(n_survey):
-        rtype = rng.choices(["seller", "buyer", "other"], weights=[60, 32, 8])[0]
-        uses = rng.random() < 0.38
-        base = rng.gauss(0, 0.75)  # general attitude shared across constructs -> correlated constructs
-        lat = {
-            "PU": 3.3 + 0.7 * base + rng.gauss(0, 0.45),
-            "PEOU": 3.0 + 0.5 * base + rng.gauss(0, 0.6) + (0.4 if uses else 0),
-            "TR": 3.0 + 0.6 * base + rng.gauss(0, 0.6) + (0.3 if uses else 0),
-            "CO": 3.0 + 0.4 * base + rng.gauss(0, 0.65),
-            "AC": 3.0 + 0.3 * base + rng.gauss(0, 0.7),
-        }
-        lat["WA"] = (
-            0.3
-            + 0.38 * lat["TR"]
-            + 0.27 * lat["PU"]
-            + 0.14 * lat["PEOU"]
-            + 0.12 * lat["CO"]
-            + 0.1 * lat["AC"]
-            + (0.15 if uses else 0)
-            + rng.gauss(0, 0.35)
-        )
-        invalid = n >= n_survey - 6  # a handful of low-quality responses so the quality flags have something to show
-        secs = rng.randint(12, 25) if invalid and n % 2 else rng.randint(90, 420)
-        r = SurveyResponse(
-            consent=True,
-            respondent_type=rtype,
-            age_band=rng.choice(["18-24", "25-34", "25-34", "35-44", "35-44", "45-54", "55+"]),
-            gender=rng.choices(["female", "male", "prefer_not_to_say"], weights=[38, 58, 4])[0],
-            district=rng.choice(dist),
-            business_type=rng.choice(BUSINESS_TYPES) if rtype == "seller" else None,
-            uses_mobile_money=uses,
-            completion_seconds=secs,
-            is_synthetic=True,
-            is_valid=not invalid,
-            invalid_reason=None if not invalid else ("too_fast" if n % 2 else "straight_lining"),
-            created_at=now - timedelta(days=rng.uniform(0, 45)),
-        )
-        for code, construct, _en, _fa, rev in QUESTIONS:
-            v = 3 if (invalid and n % 2 == 0) else clip(lat[construct] + rng.gauss(0, 0.55))
-            r.answers.append(SurveyAnswer(question_id=qrows[code].id, value=6 - v if rev else v))
-        db.add(r)
     db.commit()
-    return {"sellers": len(sellers), "buyers": n_buyers, "products": len(live), "orders": n_orders, "survey": n_survey}
+    return {"sellers": len(sellers), "buyers": n_buyers, "products": len(live), "orders": n_orders}
 
 
 def main():

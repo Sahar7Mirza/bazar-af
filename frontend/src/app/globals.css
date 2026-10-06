@@ -73,12 +73,9 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .bar { height: 10px; border-radius: 999px; background: var(--bg-alt); overflow: hidden; } .bar > span { display: block; height: 100%; background: var(--brand); border-radius: 999px; transition: width .6s; }
 .heat { display: grid; gap: 3px; font-size: .75rem; } .heat div { padding: 8px 4px; text-align: center; border-radius: 6px; font-variant-numeric: tabular-nums; }
 .steps { display: flex; gap: 6px; margin-bottom: 22px; } .steps span { flex: 1; height: 5px; border-radius: 99px; background: var(--line); } .steps span.on { background: var(--brand); }
-.likert { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; } .likert label { margin: 0; text-align: center; padding: 10px 4px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; font-size: .85rem; }
-.likert label:has(input:checked) { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); } .likert input { position: absolute; opacity: 0; width: 1px; height: 1px; } .likert label:has(input:focus-visible) { outline: 3px solid var(--brand); outline-offset: 2px; }
 .foot { background: var(--bg-alt); padding: 36px 0; font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line); }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
-@media (max-width: 600px) { .section { padding: 48px 0; } .hero { padding: 56px 0 40px; } .likert label span { display: block; } }
-
+@media (max-width: 600px) { .section { padding: 48px 0; } .hero { padding: 56px 0 40px; } }
 .bell { position: relative; text-decoration: none; font-size: 1.05rem; line-height: 1; } .bell .dot { position: absolute; top: -7px; right: -9px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 999px; background: var(--bad); color: #fff; font-size: .68rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; }
 .notif { display: block; width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; } .notif.unread { border-left: 3px solid var(--brand); } .notif h3 { font-size: 1rem; margin: 0 0 4px; } .notif p { margin: 0 0 6px; }
 
@@ -97,3 +94,9 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 /* insight cards */
 .insight { display: grid; gap: 8px; align-content: start; } .insight .k { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: .85rem; } .insight p { margin: 0; font-size: 1.05rem; line-height: 1.4; } .insight strong { font-weight: 600; }
 .delta { display: inline-flex; align-items: center; gap: 4px; font-size: .8rem; font-weight: 600; padding: 2px 9px; border-radius: 99px; width: fit-content; } .delta.up { background: var(--ok-bg); color: var(--ok); } .delta.down { background: var(--bad-bg); color: var(--bad); } .delta.flat { background: var(--bg-alt); color: var(--muted); }
+
+/* live alerts: banner that stays until the seller acts, and a toast for fresh notifications */
+.waiting { position: sticky; top: 52px; z-index: 45; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 10px 20px; background: var(--warn-bg); color: var(--warn); border-bottom: 1px solid color-mix(in srgb, var(--warn) 30%, transparent); font-size: .95rem; } .waiting span { color: var(--text); }
+.toast { position: fixed; right: 20px; bottom: 20px; z-index: 80; max-width: 420px; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 16px; background: var(--card); border: 1px solid var(--line); box-shadow: var(--shadow); animation: toast-in .25s ease-out; } .toast > svg { color: var(--brand); flex: none; } .toast div { display: flex; flex-direction: column; font-size: .9rem; min-width: 0; } .toast span { color: var(--muted); }
+@keyframes toast-in { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (max-width: 600px) { .toast { left: 12px; right: 12px; bottom: 12px; max-width: none; } }

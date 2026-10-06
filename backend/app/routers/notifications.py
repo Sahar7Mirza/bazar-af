@@ -33,7 +33,7 @@ def list_mine(unread: bool = False, params: PageParams = Depends(), user: User =
 
 @router.get("/unread-count")
 def unread_count(user: User = Depends(current_user), db: Session = Depends(get_db)):
-    return {"unread": svc.unread_count(db, user)}
+    return svc.live_state(db, user)
 
 
 @router.post("/read-all")

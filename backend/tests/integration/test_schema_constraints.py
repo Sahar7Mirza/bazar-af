@@ -8,8 +8,6 @@ from app.models import (
     PaymentPreference,
     Role,
     SellerProfile,
-    SurveyQuestion,
-    SurveyResponse,
     User,
 )
 
@@ -52,15 +50,5 @@ def test_email_unique(db):
     db.add(User(email="a@x.af", password_hash="h", full_name="A", role=Role.buyer))
     db.commit()
     db.add(User(email="a@x.af", password_hash="h", full_name="A2", role=Role.buyer))
-    with pytest.raises(IntegrityError):
-        db.commit()
-
-
-def test_survey_requires_consent_and_valid_construct(db):
-    db.add(SurveyResponse(consent=False, respondent_type="buyer"))
-    with pytest.raises(IntegrityError):
-        db.commit()
-    db.rollback()
-    db.add(SurveyQuestion(construct="XX", code="Q1", text_en="t", position=1))
     with pytest.raises(IntegrityError):
         db.commit()

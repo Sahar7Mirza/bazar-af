@@ -30,4 +30,13 @@ test("research page shows mobile-money adoption from real orders", async ({ page
   await expect(page.getByRole("heading", { name: "Buyers using mobile money" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Which mobile-money provider?" })).toBeVisible();
   await expect(page.getByText(/No money moves on Bazar.af/)).toBeVisible();
+  await expect(page.getByRole("link", { name: /Download anonymised orders/ })).toBeVisible();
+});
+
+test("public research page needs no login and shows no personal data", async ({ page }) => {
+  await page.goto("/research");
+  await expect(page.getByRole("heading", { name: "How do Kabul shoppers choose to pay?" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Orders choosing mobile money" })).toBeVisible();
+  await expect(page.getByText(/fewer than 5 orders are hidden/)).toBeVisible();
+  await expect(page.getByRole("link", { name: /Download anonymised orders/ })).toHaveCount(0);
 });

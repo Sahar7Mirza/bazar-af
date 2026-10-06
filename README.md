@@ -10,7 +10,8 @@ A marketplace for micro and small enterprises (MSEs) in Kabul, combined with a *
 | Roles | **Buyer**, **Seller** (needs admin approval), **Administrator** |
 | Stack | PostgreSQL 16 · FastAPI (Python 3.11, SQLAlchemy 2, Alembic, Pydantic v2) · Next.js 16 + React 19 (TypeScript) · Docker |
 | UI | Apple.com-inspired design, responsive, dark mode, WCAG-minded (axe-checked), loading / error / empty states |
-| Research | Mobile-money adoption measured from the Cash / Mobile Money choice at checkout: share of orders and buyers, by provider, week, district and category |
+| Research | Public page (and fuller admin page) on mobile-money adoption measured from the Cash / Mobile Money choice at checkout: share with 95% confidence interval, by provider, week, district and category, chi-square tests, anonymised CSV export |
+| Live alerts | Sellers are told of new orders within seconds, pinned until they confirm or cancel; buyers see confirmations and ready alerts live |
 
 > Deploying online: see [docs/13-deployment.md](docs/13-deployment.md) (Docker, or Vercel + Neon).
 
@@ -41,16 +42,22 @@ Captured from the running app with the seeded demo data (all data is synthetic).
 | ![Mobile](docs/img/14-mobile-home.png) | ![Dark mode](docs/img/15-dark-products.png) |
 | Responsive layout on a phone | Dark mode follows the system setting |
 
-Research page (mobile-money adoption from real orders, with plain-language insight cards):
+Public Research page (anyone can open it; mobile-money adoption from checkout choices, with confidence intervals and plain-language insight cards), and the admin version with every group and a CSV download:
 
-![Research dashboard](docs/img/11-admin-research.png)
+![Public research page](docs/img/21-public-research.png)
+
+Live seller alert: a new order appears on its own, with a banner that stays until the seller acts:
+
+![Live new-order alert](docs/img/22-live-new-order.png)
+
+![Admin research](docs/img/11-admin-research.png)
 
 ## Quick start (Docker)
 ```bash
 git clone <this repo> && cd bazar-af
 cp .env.example .env         # set POSTGRES_PASSWORD, JWT_SECRET (openssl rand -hex 32), SEED_PASSWORD
 docker compose up -d --build
-docker compose --profile seed run --rm seed     # demo data: 40 sellers, 172 products, 150 orders, 165 survey responses
+docker compose --profile seed run --rm seed     # demo data: 40 sellers, 172 products, 150 orders
 ```
 Open http://localhost:3000. Demo accounts (password = your `SEED_PASSWORD`): `admin@demo.bazar.af`, `seller01@demo.bazar.af` ... `seller40`, `buyer01@demo.bazar.af` ... `buyer30`.
 Swagger UI is at http://localhost:8000/docs when `ENVIRONMENT=development`.
@@ -70,7 +77,8 @@ More: [local install without Docker](docs/13-deployment.md) · [testing](docs/12
 - **RBAC in two steps:** role dependency on the route, then object-level ownership check in the service (other users' resources return 404).
 - Server-side validation everywhere (Pydantic); prices and totals computed on the server; row locks prevent overselling (tested with concurrent requests).
 - Pagination on every list, `created_at`/`updated_at` on every table, append-only `audit_log`, JSON logs with request IDs, one error format, security headers, CORS allow-list.
-- The anonymous survey API (no user id / IP / phone stored) still exists in the backend but has no page in the web app; adoption is measured from checkout preferences instead.
+- The research page is public but anonymous: only totals, groups under 5 orders are hidden, no names or IDs. Admins can download a CSV with one anonymised row per order.
+- Sellers get a live "new order" alert (checked every 5 s, no refresh) that stays pinned until they confirm or cancel the order.
 - Secrets only via environment variables; `.env` is git-ignored; `.env.example` documents everything; production refuses weak secrets and refuses to seed.
 
 ## Documentation
@@ -79,11 +87,11 @@ More: [local install without Docker](docs/13-deployment.md) · [testing](docs/12
 | [01 Requirements](docs/01-requirements.md) | scope, constraints, functional / non-functional |
 | [02 Architecture](docs/02-architecture.md) | architecture diagram, auth flow, order state machine |
 | [03 Use cases](docs/03-use-cases.md) | actors and use cases |
-| [04 ER diagram](docs/04-er-diagram.md) | Mermaid ER diagrams (marketplace + survey) |
+| [04 ER diagram](docs/04-er-diagram.md) | Mermaid ER diagrams |
 | [05 Database schema](docs/05-database-schema.md) | SQL, constraints, indexes |
 | [06 API structure](docs/06-api.md) · [OpenAPI JSON](docs/api/openapi.json) | endpoints, roles, error and page formats (regenerate: `python -m app.export_openapi`) |
 | [07 UI plan](docs/07-ui-plan.md) · [08 Folder structure](docs/08-folder-structure.md) · [09 Roadmap](docs/09-roadmap.md) | |
-| [10 Research module](docs/10-research-module.md) | instrument, statistics, dashboard |
+| [10 Research module](docs/10-research-module.md) | how adoption is measured, statistics, public and admin pages |
 | [11 v1 gap analysis](docs/11-v1-gap-analysis.md) | what the live v1 lacked and how this rebuild answers it |
 | [12 Testing](docs/12-testing.md) · [13 Deployment](docs/13-deployment.md) · [14 Demo accounts](docs/14-demo-accounts.md) · [Usability plan](docs/usability/01-test-plan.md) | |
 
@@ -94,7 +102,7 @@ Backend **108** (unit, API, integration incl. concurrency) at **96 %** coverage 
 Feature branches (`feature/...`) merged with `--no-ff` into `main`; tests run before each merge; commits are feature-based. No secrets are committed.
 
 ## Known limitations
-- Dari (RTL) interface is planned; the questionnaire already carries Dari text (please proofread before real use).
+- Dari (RTL) interface is planned.
 - No email/SMS verification, password reset or image uploads yet.
-- Demo orders and the dormant survey data are **synthetic**.
+- Demo orders are **synthetic**.
 - Docker images are not yet built/verified (see [deployment notes](docs/13-deployment.md#verification-status)).

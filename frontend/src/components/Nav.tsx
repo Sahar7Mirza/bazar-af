@@ -1,10 +1,10 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { useState } from "react";
 import { Icon } from "./Icon";
 import { useCart } from "@/lib/cart";
+import { useLive } from "./Live";
 import { useSession } from "./Session";
 
 export function Nav() {
@@ -12,16 +12,8 @@ export function Nav() {
   const path = usePathname();
   const cart = useCart();
   const [open, setOpen] = useState(false);
-  const [unread, setUnread] = useState(0);
+  const unread = useLive().live.unread;  // refreshed every few seconds by LiveProvider
   const uid = user?.id;
-  useEffect(() => {  // poll the unread count every 30 s (and whenever the page changes) so a "confirmed / ready" alert shows up on its own
-    if (!uid) return;
-    let live = true;
-    const load = () => api<{ unread: number }>("notifications/unread-count").then((r) => live && setUnread(r.unread)).catch(() => {});
-    load();
-    const t = setInterval(load, 30000);
-    return () => { live = false; clearInterval(t); };
-  }, [uid, path]);
   const n = cart.reduce((s, l) => s + l.qty, 0);
   const cur = (href: string) => (path === href || (href !== "/" && path.startsWith(href)) ? "page" : undefined);
   const home = user?.role === "admin" ? "/admin" : user?.role === "seller" ? "/seller" : null;
@@ -32,6 +24,7 @@ export function Nav() {
         <button className="btn quiet sm menu-btn" aria-expanded={open} aria-controls="mainnav" onClick={() => setOpen(!open)}>{open ? "Close" : "Menu"}</button>
         <nav id="mainnav" className={`nav ${open ? "open" : ""}`} aria-label="Main" onClick={() => setOpen(false)}>
           <Link href="/products" aria-current={cur("/products")}>Shop</Link>
+          <Link href="/research" aria-current={cur("/research")}>Research</Link>
           {user && user.role !== "admin" && <Link href="/orders" aria-current={cur("/orders")}>Orders</Link>}
           {user?.role === "buyer" && <Link href="/interests" aria-current={cur("/interests")}>My interests</Link>}
           {home && <Link href={home} aria-current={cur(home)}>{user?.role === "admin" ? "Admin" : "My shop"}</Link>}

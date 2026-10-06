@@ -6,7 +6,7 @@ A classic three-tier web application: **Next.js (TypeScript)** for the UI, **Fas
 ```mermaid
 flowchart LR
   subgraph Browser
-    UI[React pages<br/>Buyer / Seller / Admin / Survey]
+    UI[React pages<br/>Buyer / Seller / Admin / Research]
   end
   subgraph Web["Next.js server (:3000)"]
     GUARD[proxy.ts route guard]
@@ -15,7 +15,7 @@ flowchart LR
   subgraph Api["FastAPI (:8000)"]
     MW[Middleware: request-id, JSON access log,<br/>security headers, CORS]
     R[routers -> services -> models]
-    AN[analytics: pandas / SciPy / statsmodels]
+    AN[research: aggregates, Wilson CI, chi-square]
   end
   DB[(PostgreSQL 16)]
   UI -- same-origin fetch, httpOnly cookies --> GUARD --> BFF

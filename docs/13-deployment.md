@@ -14,7 +14,6 @@ Web: http://localhost:3000 · API: http://localhost:8000 (Swagger at `/docs` onl
 - Do not expose port 8000 or 5432 publicly; only the web container needs to reach the API.
 - Create the first administrator from the database or a one-off script (admins cannot self-register). Do not use the demo seed in production.
 - Back up the `pgdata` volume (`pg_dump`). Migrations run automatically on API start (`alembic upgrade head`); they are forward-only in production.
-- The in-memory survey rate limiter is per process; run one API replica or move limiting to the gateway/Redis before scaling out.
 - Logs are JSON on stdout with `request_id`; collect them with your platform's log driver.
 
 ## Without Docker
@@ -42,5 +41,5 @@ Two Vercel projects are created from this one repository, plus a Neon database.
 - The API entrypoint is `backend/index.py`. `backend/scripts/vercel_build.py` applies Alembic migrations at build time (skipped when `DATABASE_URL` is not set).
 - Create the API project first, then the web project (it needs the API URL). Add the web URL to `CORS_ORIGINS` and redeploy the API.
 - Demo data: `python -m app.seed --reset` refuses `ENVIRONMENT=production`. Run it once from a developer machine with `ENVIRONMENT=development`, `SEED_PASSWORD` and `DATABASE_URL` pointing at the Neon database.
-- Limits to know: the Python bundle limit is 500 MB (the API is about 340 MB with pandas, SciPy and statsmodels); the in-memory login rate limiter is per function instance, so it is best effort on serverless, while account lockout is stored in the database.
+- Limits to know: the Python bundle limit is 500 MB (the API is now small: the heavy statistics libraries were removed with the survey); account lockout is stored in the database, so it works across serverless instances.
 - Vercel Deployment Protection must not block the API's production URL, or the web project's server-side calls will receive 401.
